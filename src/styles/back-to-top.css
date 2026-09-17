@@ -1,0 +1,170 @@
+/* ============================================================
+   BACK TO TOP
+
+   The floating control from components/navigation/BackToTop.tsx.
+   A dark disc on the header's own control surface, whose border
+   is the page's scroll progress — the ring fills clockwise from
+   twelve o'clock as you read down.
+
+   Hover does two things and no more: the brand gradient rises
+   into the disc from the bottom, the direction it is about to
+   take you, and the arrow rolls up and out as a second one
+   rises into its place — the same move the page's CTA labels
+   make, so the control speaks the site's language.
+
+   Framer owns .btt's transform for the entrance and exit, so the
+   lift and the press live on .btt-button.
+============================================================ */
+
+@layer components {
+  .btt {
+    --btt-size: clamp(46px, 3.6vw, 52px);
+    --btt-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: fixed;
+    right: calc(env(safe-area-inset-right, 0px) + clamp(16px, 2.2vw, 32px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(18px, 2.4vw, 34px));
+    /* Under the header (z-60) and its mobile menu, over everything else. */
+    z-index: 50;
+  }
+
+  .btt-button {
+    position: relative;
+    /* Keeps the fill's z-index: -1 inside the button, above its ground. */
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    width: var(--btt-size);
+    height: var(--btt-size);
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface-header-dense);
+    box-shadow: 0 12px 30px -14px rgba(0, 0, 0, 0.9);
+    color: var(--color-accent-lilac);
+    cursor: pointer;
+    transition:
+      transform 0.4s var(--btt-ease),
+      box-shadow 0.4s ease,
+      color 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btt-button:focus-visible {
+    outline: 2px solid var(--color-accent-lilac);
+    outline-offset: 4px;
+  }
+
+  /* The hover fill: parked just below the disc, rises on hover. */
+  .btt-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--gradient-brand);
+    transform: translateY(101%);
+    transition: transform 0.5s var(--btt-ease);
+  }
+
+  /* ---------- Progress ring: the border ---------- */
+
+  .btt-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    /* base.css caps every svg at max-width: 100%; this one is sized by
+       inset and must not be squeezed by it. */
+    max-width: none;
+    /* Start the fill at twelve o'clock. */
+    rotate: -90deg;
+    pointer-events: none;
+  }
+
+  .btt-ring-track,
+  .btt-ring-fill {
+    fill: none;
+    stroke-width: 2;
+    transition: stroke 0.3s ease;
+  }
+
+  .btt-ring-track {
+    stroke: rgba(255, 255, 255, 0.1);
+  }
+
+  .btt-ring-fill {
+    stroke: url(#btt-ring-stroke);
+    stroke-linecap: round;
+  }
+
+  /* ---------- Arrow: two in one cell ---------- */
+
+  .btt-arrow {
+    display: grid;
+    width: 40%;
+    height: 40%;
+    overflow: hidden;
+  }
+
+  .btt-arrow > svg {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
+    transition: translate 0.5s var(--btt-ease);
+  }
+
+  .btt-arrow > svg + svg {
+    translate: 0 120%;
+  }
+
+  /* ---------- Lit: pointer or keyboard ---------- */
+
+  .btt-button:is(:hover, :focus-visible) {
+    box-shadow: 0 14px 34px -12px rgba(168, 85, 247, 0.65);
+    color: #fff;
+  }
+
+  .btt-button:is(:hover, :focus-visible)::before {
+    transform: translateY(0);
+  }
+
+  /* On the gradient the coloured ring would vanish; it turns white. */
+  .btt-button:is(:hover, :focus-visible) .btt-ring-track {
+    stroke: rgba(255, 255, 255, 0.24);
+  }
+
+  .btt-button:is(:hover, :focus-visible) .btt-ring-fill {
+    stroke: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ---------- Motion ---------- */
+
+  @media (prefers-reduced-motion: no-preference) {
+    .btt-button:is(:hover, :focus-visible) {
+      transform: translateY(-3px);
+    }
+
+    .btt-button:is(:hover, :focus-visible) .btt-arrow > svg:first-child {
+      translate: 0 -120%;
+    }
+
+    .btt-button:is(:hover, :focus-visible) .btt-arrow > svg + svg {
+      translate: 0 0;
+    }
+
+    /* Declared after the hover rule, at the same specificity, so the press
+       wins while it lasts. */
+    .btt-button:active {
+      transform: translateY(0) scale(0.94);
+      transition-duration: 80ms;
+    }
+  }
+
+  /* Reduced motion keeps the colour change and drops the roll. */
+  @media (prefers-reduced-motion: reduce) {
+    .btt-arrow > svg + svg {
+      display: none;
+    }
+  }
+}

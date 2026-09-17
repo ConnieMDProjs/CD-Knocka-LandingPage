@@ -1,0 +1,50 @@
+/* ============================================================
+   REUSABLE UTILITIES
+
+   What is left here is what Tailwind cannot express cleanly.
+
+   Six hand-rolled utilities were removed in the Tailwind
+   migration - .container, .page-inline, .glass, .glass-control,
+   .glass-blur and .glow. All six were unreferenced by any
+   component, and every one of them is now a plain composition of
+   utilities generated from the @theme tokens:
+
+     .glass          -> bg-glass border border-border-subtle
+     .glass-control  -> bg-glass-strong border border-border-glass
+     .glass-blur     -> backdrop-blur-[var(--blur-glass)]
+     .page-inline    -> px-[var(--spacing-inline)]
+     .container      -> mx-auto w-[min(var(--container-max),calc(100%-2*var(--container-gutter)))]
+
+   Keeping a second vocabulary for the same thing is how the two
+   drift apart, so the tokens stay and the wrappers went.
+============================================================ */
+
+@layer components {
+  /*
+    Stays in CSS: background-clip on text needs the -webkit- pair to survive,
+    and the --gradient custom property is the override hook every section uses
+    to swap the fill without restating the clip machinery.
+  */
+  .text-gradient {
+    background-image: var(--gradient, var(--gradient-brand));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+@layer components {
+  /* Mask box for TextReveal. The padding/margin pair gives descenders and
+     gradient bleed room to render outside the clipped line box. */
+  .text-reveal {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.14em;
+    margin-bottom: -0.14em;
+  }
+
+  .text-reveal-inner {
+    display: block;
+    will-change: transform;
+  }
+}

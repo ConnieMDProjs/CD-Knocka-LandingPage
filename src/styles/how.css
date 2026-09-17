@@ -1,0 +1,460 @@
+/* ============================================================
+   HOW IT WORKS
+
+   Five cards down a zigzag, joined by one dashed line with an
+   arrow on every hop. Each card has its own colour and its own
+   angle, and hovering one takes it back to level.
+
+   THE TILT IS `rotate`, NOT `transform`. Framer owns each
+   card's transform for the entrance, and an inline transform
+   beats any :hover rule on the same element. `rotate` is a
+   separate CSS property applied before `transform`, so the two
+   compose and the straighten-on-hover keeps working after the
+   entrance has run.
+
+   The connector is one <path> generated from the same array
+   that lays the cards out (see steps.ts), stretched with
+   preserveAspectRatio="none". `vectorEffect: non-scaling-stroke`
+   is what keeps the dashes even under that stretch — without it
+   they smear horizontally.
+============================================================ */
+
+@layer components {
+  .how {
+    position: relative;
+    z-index: 10;
+  }
+
+  .how-inner {
+    width: min(var(--stage-max), calc(100% - 2 * var(--container-gutter)));
+    margin-inline: auto;
+    /* Asymmetric: the cards' tilt already hangs past the track's bottom
+       edge, and Rooms' intro opens with padding of its own. */
+    padding-block: clamp(56px, 8vh, 112px) clamp(40px, 6vh, 88px);
+  }
+
+  /* ---------- Head ---------- */
+
+  .how-head {
+    max-width: min(700px, 74%);
+    margin-bottom: clamp(40px, 6vh, 78px);
+  }
+
+  .how-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 20px;
+    padding: 7px 15px;
+    border: 1px solid var(--color-border-accent);
+    border-radius: var(--radius-pill);
+    background: rgba(168, 85, 247, 0.08);
+    color: var(--color-accent-lilac);
+    font-size: var(--text-label);
+  }
+
+  .how-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(30px, 4.6vw, 68px);
+    font-weight: var(--font-weight-display);
+    line-height: 0.94;
+    letter-spacing: -0.042em;
+    text-transform: uppercase;
+  }
+
+  .how-title .text-gradient {
+    --gradient: var(--gradient-heading);
+  }
+
+  .how-lead {
+    max-width: 46ch;
+    margin: clamp(18px, 2.2vw, 26px) 0 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(14px, 1.05vw, 17px);
+    line-height: 1.62;
+  }
+
+  /* ---------- The zigzag ---------- */
+
+  /*
+    Equal rows are load-bearing. The connector is drawn in a normalised
+    viewBox with one hop per row, so if the rows were content-sized the line
+    would stop pointing at the cards. `grid-auto-rows: 1fr` plus a min-height
+    on the card is what keeps the two in step without measuring either.
+  */
+  .how-track {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    column-gap: clamp(26px, 4vw, 64px);
+    row-gap: clamp(28px, 4vw, 56px);
+  }
+
+  .how-line {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .how-line-narrow {
+    display: none;
+  }
+
+  .how-arrow {
+    position: absolute;
+    left: 50%;
+    top: var(--ay);
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: clamp(28px, 3vw, 38px);
+    aspect-ratio: 1;
+    border: 1px solid var(--color-border-accent);
+    border-radius: 50%;
+    background: rgba(12, 7, 22, 0.92);
+    color: var(--color-accent-violet);
+    translate: -50% -50%;
+    rotate: var(--arot);
+    pointer-events: none;
+  }
+
+  .how-arrow svg {
+    width: 52%;
+    height: 52%;
+  }
+
+  /* ---------- A card ---------- */
+
+  .how-card {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    min-height: clamp(230px, 22vw, 300px);
+    flex-direction: column;
+    padding: clamp(20px, 2vw, 30px);
+    border: 1px solid var(--ring);
+    border-radius: clamp(18px, 1.8vw, 28px);
+    background: var(--tint);
+    box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.9);
+    rotate: var(--rot);
+    transition:
+      rotate 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.5s ease;
+  }
+
+  /*
+    Narrower than the column, and pushed outward. That is what opens the
+    diagonal gutter the dashed hops cross — at full column width the cards
+    met in the middle and there was nowhere for a connector to be seen.
+  */
+  .how-card[data-side="left"] {
+    grid-column: 1;
+    width: 90%;
+    justify-self: start;
+  }
+
+  .how-card[data-side="right"] {
+    grid-column: 2;
+    width: 90%;
+    justify-self: end;
+  }
+
+  /* The interaction: the card straightens under the pointer. */
+  .how-card:hover,
+  .how-card:focus-within {
+    box-shadow: 0 36px 80px -34px rgba(0, 0, 0, 0.95);
+    rotate: 0deg;
+  }
+
+  .how-n {
+    font-family: var(--font-display);
+    font-size: clamp(11px, 1vw, 13px);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.24em;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .how-card-title {
+    margin: 0 0 8px;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 1.9vw, 27px);
+    font-weight: var(--font-weight-display);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .how-card-line {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: clamp(13px, 0.95vw, 15px);
+    line-height: 1.55;
+  }
+
+  /* ---------- The pictures ---------- */
+
+  /*
+    Each one is a small piece of the product rather than an icon. They sit in
+    the middle of the card and push the copy to the bottom, so every card
+    reads number -> picture -> words in the same order.
+  */
+  .how-art {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    margin: clamp(14px, 1.6vw, 22px) 0 clamp(16px, 1.8vw, 24px);
+  }
+
+  .how-well {
+    display: grid;
+    place-items: center;
+    gap: 8px;
+    width: min(150px, 78%);
+    padding: clamp(14px, 1.6vw, 20px) 12px;
+    border: 1.5px dashed rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-media);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .how-well svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .how-art-selfie {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .how-file {
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    background: rgba(8, 5, 14, 0.42);
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  /* A portrait, cropped round. The renders are cutouts, so the card's own
+     colour shows through behind every one of them. */
+  .how-face {
+    position: relative;
+    display: block;
+    width: clamp(84px, 9vw, 120px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .how-face img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 10%;
+  }
+
+  .how-art-avatar {
+    gap: clamp(12px, 1.4vw, 18px);
+  }
+
+  .how-swatches {
+    display: grid;
+    gap: 9px;
+  }
+
+  .how-swatches i {
+    display: block;
+    width: 17px;
+    height: 17px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
+  }
+
+  .how-swatches i[data-on="true"] {
+    border-color: #fff;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6);
+  }
+
+  .how-art-message {
+    position: relative;
+    gap: 0;
+  }
+
+  .how-bubble {
+    max-width: 74%;
+    padding: 12px 16px 14px;
+    border-radius: 18px 18px 18px 5px;
+    background: rgba(8, 5, 14, 0.5);
+    color: #fff;
+    font-size: clamp(12px, 1vw, 14px);
+    line-height: 1.4;
+  }
+
+  .how-bubble em {
+    display: block;
+    margin-top: 5px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+    font-style: normal;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* The avatar arrives out of the bubble, which is the product in one image. */
+  .how-face-pop {
+    width: clamp(64px, 7vw, 92px);
+    margin-left: -14px;
+    translate: 0 -18%;
+  }
+
+  .how-art-room {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .how-stack {
+    display: flex;
+    align-items: center;
+  }
+
+  .how-stack i {
+    position: relative;
+    display: block;
+    width: clamp(46px, 5vw, 64px);
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 2px solid rgba(10, 6, 18, 0.55);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+  }
+
+  .how-stack i + i {
+    margin-left: -16px;
+  }
+
+  .how-stack img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 8%;
+  }
+
+  .how-stack b {
+    margin-left: -12px;
+    display: grid;
+    place-items: center;
+    width: clamp(46px, 5vw, 64px);
+    aspect-ratio: 1;
+    border: 2px solid rgba(10, 6, 18, 0.55);
+    border-radius: 50%;
+    background: rgba(8, 5, 14, 0.62);
+    color: #fff;
+    font-size: 13px;
+    font-weight: var(--font-weight-medium);
+  }
+
+  .how-art-knock {
+    gap: 10px;
+  }
+
+  .how-knock {
+    padding: 7px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 5, 14, 0.42);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: clamp(10px, 0.9vw, 12px);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .how-knock[data-mark="2"] {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* ---------- Narrow ---------- */
+
+  /*
+    One column, and the zigzag becomes a gentle wave down the middle. The
+    cards keep their angles and keep straightening on tap-and-hold, because
+    the tilt is what makes the row of cards read as a route rather than a
+    list.
+  */
+  @media (max-width: 760px) {
+    .how-track {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: clamp(30px, 7vw, 48px);
+    }
+
+    .how-card[data-side="left"],
+    .how-card[data-side="right"] {
+      grid-column: 1;
+      width: 100%;
+      justify-self: stretch;
+    }
+
+    .how-card {
+      min-height: 0;
+    }
+
+    .how-line-wide {
+      display: none;
+    }
+
+    .how-line-narrow {
+      display: block;
+    }
+
+    .how-arrow {
+      rotate: 0deg;
+    }
+  }
+
+  /* ---------- Static composition ---------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .how-card {
+      transition: none;
+    }
+  }
+
+  /* Without JS the entrance styles are what the server rendered, so they
+     need clearing or the route never appears. */
+  @media (scripting: none) {
+    .how-eyebrow,
+    .how-lead,
+    .how-card,
+    .how-arrow {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .how-line path {
+      opacity: 0.7 !important;
+      stroke-dasharray: 7 9 !important;
+      stroke-dashoffset: 0 !important;
+    }
+  }
+}

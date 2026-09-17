@@ -1,0 +1,52 @@
+/* ============================================================
+   SITE HEADER — the one rule Tailwind should not own
+
+   The bar, the nav, the pill, the mobile panel and every
+   breakpoint moved onto the elements in SiteHeader.tsx during
+   the Tailwind cleanup. What is left is the menu icon, and it
+   stays here on purpose:
+
+   two bars folding into a cross is a single element plus its
+   ::before, where BOTH transition transform and width, and both
+   change again on [data-open="true"]. Expressed as utilities
+   that is a `before:` chain of a dozen classes carrying an
+   inherited transition — objectively less readable than the
+   twenty lines below, and the brief's rule is quality over
+   percentage.
+============================================================ */
+
+@layer components {
+  .site-menu-icon,
+  .site-menu-icon::before {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: var(--color-text-primary);
+    transition:
+      transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      width 0.3s ease;
+  }
+
+  .site-menu-icon {
+    position: relative;
+    transform: translateY(-3px);
+  }
+
+  .site-menu-icon::before {
+    content: "";
+    position: absolute;
+    top: 6px;
+    width: 11px;
+  }
+
+  .site-menu-icon[data-open="true"] {
+    transform: translateY(0) rotate(45deg);
+  }
+
+  .site-menu-icon[data-open="true"]::before {
+    top: 0;
+    width: 16px;
+    transform: rotate(-90deg);
+  }
+}

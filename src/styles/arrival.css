@@ -1,0 +1,414 @@
+/* ============================================================
+   ARRIVAL (S2) — "THE FLAT -> THE ARRIVAL"
+
+   The one section on the page that starts by looking like it is
+   not Knocka. A grey thread sits on an opaque plate that hides
+   the DNA field entirely; the thread collapses into a point, the
+   plate lifts, the particles flood back and the avatar opens out
+   of that point and knocks twice.
+
+   No brand furniture at the top of the section: no eyebrow, no
+   accent, no colour until the plate lifts. The absence is the
+   first half of the argument.
+
+   Everything animated here is transform or opacity, and nothing
+   that moves carries a filter — the DNA canvas repaints behind
+   all of it, so a blur or shadow on a moving layer would
+   re-rasterise every frame (measured elsewhere on this page at
+   60fps -> 11fps).
+
+   Authored for the pinned composition; the static composition at
+   the bottom of the file is what reduced-motion and no-JS get.
+============================================================ */
+
+@layer components {
+  .arrival {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* The flat half owns about two thirds of this. 290vh is deliberate and
+     is the ceiling: the strategy caps any one section at 300vh. */
+  .arrival-runway {
+    height: 290vh;
+  }
+
+  .arrival-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    /*
+      The top padding is the clearance under the floating header, which ends
+      about 80px down. It was clamp(96px, 13vh, 140px), and on a short window
+      the stage content overflowed its own height — align-content: center then
+      pushed the headline UP, behind the header. Measured at 1280x720: title
+      top 64px against a header bottom of 70px.
+    */
+    gap: clamp(16px, 2.6vh, 40px);
+    padding: clamp(110px, 15vh, 160px) var(--container-gutter)
+      clamp(32px, 6vh, 60px);
+  }
+
+  /* ---------- The plate ---------- */
+
+  /*
+    One solid layer whose only animated property is opacity.
+
+    It starts exactly at the stage's top edge and never reaches above it: the
+    section paints over the hero (later sibling, same z-index), so an
+    overhang here put an opaque plate across the bottom of the hero at page
+    load — measured, it hid the hero's lead and CTA. It does overhang
+    downward, so nothing shows beneath the plate while the section is pinned.
+
+    The 44px feather softens the edge as it rises during the approach; when
+    the section pins, that edge is at the very top of the viewport, behind
+    the floating header. Default opacity 0, so without JS the page is never
+    left with a plate over it.
+  */
+  .arrival-scrim {
+    position: absolute;
+    inset: 0 0 -60vh 0;
+    z-index: 0;
+    opacity: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(6, 6, 10, 0) 0,
+      #06060a 44px,
+      #06060a 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ---------- Headline ---------- */
+
+  /*
+    Both lines live in one grid cell so the second can replace the first
+    without the stage reflowing. The cell takes the height of the taller
+    line, which is why the slot never jumps.
+  */
+  .arrival-title {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-areas: "line";
+    place-items: center;
+    width: min(var(--stage-max), 100%);
+    margin: 0;
+    font-family: var(--font-display);
+    /*
+      min(vw, vh) so a wide-but-short window cannot pick a size that needs
+      more vertical room than the stage has. The question wraps to two lines
+      at every desktop width, so this is worth 20-30px of budget.
+    */
+    font-size: clamp(29px, min(5.4vw, 8vh), 76px);
+    font-weight: var(--font-weight-display);
+    line-height: 0.94;
+    letter-spacing: -0.042em;
+    text-align: center;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .arrival-title-line {
+    grid-area: line;
+  }
+
+  .arrival-title .text-gradient {
+    --gradient: var(--gradient-heading);
+  }
+
+  /*
+    The supporting line, on its own stage row rather than inside the headline
+    grid: the headline cell is sized by the taller of its two lines, and
+    adding a third element to it would make the cell resize mid-sequence.
+  */
+  .arrival-sub {
+    position: relative;
+    z-index: 1;
+    max-width: 34ch;
+    margin: 0;
+    color: var(--color-accent-lilac);
+    font-size: clamp(14px, 1.15vw, 18px);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.03em;
+    text-align: center;
+  }
+
+  /* ---------- Core: thread and arrival share one cell ---------- */
+
+  /*
+    The thread and the arrival occupy the same grid cell, so the thread's
+    transform origin and the frame's transform origin are the same point.
+    That is the whole trick: the conversation is pulled into a point and the
+    avatar opens out of it, with no measurement and no layout reads.
+  */
+  .arrival-core {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-areas: "core";
+    place-items: center;
+    width: min(var(--stage-max), 100%);
+  }
+
+  .arrival-thread,
+  .arrival-stack {
+    grid-area: core;
+  }
+
+  /* ---------- Beats 01-03: the ordinary thread ---------- */
+
+  .arrival-thread {
+    width: min(470px, 100%);
+    will-change: transform;
+  }
+
+  /*
+    Sized against the viewport height, not fixed. Eight messages at a fixed
+    9px/10px/16px are 436px tall, which is what pushed the headline off the
+    top of a short window. On a tall screen these all sit at their maximum
+    and nothing has changed.
+  */
+  .arrival-thread-list {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(5px, 1svh, 9px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /*
+    Authored grey. Never `filter: grayscale()` — the thread is scaled while
+    it collapses, and a filter on a scaling element repaints it every frame.
+  */
+  .arrival-bubble {
+    max-width: 76%;
+    padding: clamp(7px, 1.1svh, 10px) 14px;
+    border-radius: 16px;
+    font-size: clamp(12px, min(1.05vw, 1.6svh), 16px);
+    line-height: 1.45;
+    will-change: transform, opacity;
+  }
+
+  .arrival-bubble[data-from="them"] {
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+    background: rgba(255, 255, 255, 0.045);
+    color: rgba(255, 255, 255, 0.38);
+  }
+
+  .arrival-bubble[data-from="you"] {
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+    background: rgba(255, 255, 255, 0.075);
+    color: rgba(255, 255, 255, 0.46);
+  }
+
+  .arrival-thread-meta {
+    margin: clamp(8px, 1.4svh, 13px) 2px 0;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Beats 04-06: the arrival ---------- */
+
+  .arrival-stack {
+    position: relative;
+    /*
+      1:1. The welcome video was assumed to be 1440x1080; it is actually
+      1440x1440. The ratio now comes from the media config via an inline
+      custom property, so the frame and its contents cannot disagree again.
+      This value is the fallback for the still-image path.
+    */
+    --arrival-ratio: 1 / 1;
+    width: max(220px, min(620px, 100%, calc(100svh - 360px)));
+  }
+
+  .arrival-bloom {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 158%;
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    opacity: 0.55;
+    background: radial-gradient(
+      circle,
+      rgba(168, 85, 247, 0.36) 0%,
+      rgba(147, 45, 255, 0.2) 34%,
+      rgba(56, 189, 248, 0.09) 56%,
+      transparent 74%
+    );
+    pointer-events: none;
+  }
+
+  /* What the thread collapses into and what the frame opens out of. */
+  .arrival-spark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: clamp(110px, 20vw, 240px);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    border-radius: 50%;
+    opacity: 0;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(216, 180, 254, 0.5) 18%,
+      rgba(168, 85, 247, 0.22) 40%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  .arrival-frame-outer {
+    position: relative;
+    z-index: 1;
+    will-change: transform, opacity;
+  }
+
+  /*
+    A portal, not a card: the fill is translucent so the DNA still reads
+    through it, which is what ties the arrival to the field that just came
+    back. A video source covers it completely.
+  */
+  .arrival-frame {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: var(--arrival-ratio);
+    overflow: hidden;
+    border: 1px solid var(--color-border-glass);
+    border-radius: clamp(16px, 1.8vw, 26px);
+    background: rgba(9, 7, 16, 0.34);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+
+  .arrival-frame img.arrival-media-el {
+    /* The logo is wider than tall, so it is allowed to fill nearly the
+       whole frame rather than being capped by height. */
+    width: 96%;
+    height: 96%;
+    object-fit: contain;
+  }
+
+  .arrival-frame video.arrival-media-el {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Edge light for each hit. Static geometry, opacity only. */
+  .arrival-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    opacity: 0;
+    box-shadow:
+      inset 0 0 0 1px rgba(216, 180, 254, 0.6),
+      inset 0 0 70px rgba(168, 85, 247, 0.4);
+    pointer-events: none;
+  }
+
+  /* ---------- Beat 07: the breath before S3 ---------- */
+
+  .arrival-closer {
+    position: relative;
+    z-index: 1;
+    max-width: 46ch;
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(14px, 1.05vw, 17px);
+    text-align: center;
+  }
+
+  /* ---------- Responsive ---------- */
+
+  /*
+    Mobile shortens the pin rather than dropping it: the collapse is a
+    transition between two states in one place, so it has nowhere to live in
+    a stack of separate reveals. Everything else scales down.
+  */
+  @media (max-width: 900px) {
+    .arrival-runway {
+      height: 260vh;
+    }
+
+    .arrival-stack {
+      width: max(200px, min(520px, 100%, calc(100svh - 330px)));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .arrival-runway {
+      height: 235vh;
+    }
+
+    .arrival-thread {
+      width: min(340px, 100%);
+    }
+
+    .arrival-bubble {
+      max-width: 82%;
+    }
+  }
+
+  /* ---------- Static composition ---------- */
+
+  /*
+    Reduced motion, and no-JS as a safeguard, both get the same thing: no
+    pin, no plate, and the two halves of the story un-stacked into a column
+    so the section still reads top to bottom with nothing animating.
+  */
+  @media (prefers-reduced-motion: reduce), (scripting: none) {
+    .arrival-runway {
+      height: auto;
+    }
+
+    .arrival-stage {
+      position: static;
+      height: auto;
+      padding-block: clamp(72px, 11vh, 116px);
+    }
+
+    .arrival-scrim {
+      display: none;
+    }
+
+    .arrival-title {
+      display: block;
+    }
+
+    .arrival-title-line {
+      display: block;
+    }
+
+    .arrival-core {
+      grid-template-areas: "thread" "arrival";
+      gap: clamp(30px, 6vh, 64px);
+    }
+
+    .arrival-thread {
+      grid-area: thread;
+    }
+
+    .arrival-stack {
+      grid-area: arrival;
+    }
+
+    .arrival-spark {
+      display: none;
+    }
+  }
+}

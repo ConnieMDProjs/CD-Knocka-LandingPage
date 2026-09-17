@@ -1,0 +1,115 @@
+/* ============================================================
+   AOS REVEALS
+
+   Every AOS animation this page uses. AOS's JavaScript
+   contributes nothing but the `aos-init` / `aos-animate` class
+   toggles; the movement is all here, so the library's own
+   stylesheet is never imported.
+
+   THE HIDDEN STATE IS GATED ON .aos-init, NOT ON [data-aos].
+
+   That is the whole trick, and it is worth keeping. `.aos-init`
+   is added by AOS at initialisation, so:
+
+     - no JavaScript  -> no .aos-init -> content is simply visible,
+       with no <noscript> override needed for these elements
+     - reduced motion -> AOS's `disable` hook runs instead of
+       init, strips the data-aos attributes and never adds
+       .aos-init -> content is visible with nothing to suppress
+
+   Both failure modes land on "visible", which is the opposite of
+   the usual data-attribute reveal where a JS failure leaves the
+   page blank.
+
+   Longhands, not the `transition` shorthand: the shorthand would
+   reset transition-delay and stamp on the Tailwind `delay-*`
+   utilities that stagger these reveals.
+============================================================ */
+
+@layer components {
+  /* Matches the entrance the Framer `rise()` helpers used across the
+     page — 22px, 800ms, the site's standard ease-out — so the two
+     systems are indistinguishable where they sit next to each other. */
+  [data-aos="knocka-rise"].aos-init {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    transition-property: opacity, transform;
+    transition-duration: 800ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /*
+    transform: none, not translate3d(0, 0, 0).
+
+    AOS's own animations settle on an identity translate3d, which leaves every
+    revealed element on its own compositor layer for the life of the page —
+    eight of them here, all static text. Settling on "none" drops the layer
+    once the reveal is done. CSS interpolates a transform to "none" by
+    treating none as the identity matrix, so the movement is unchanged.
+  */
+  [data-aos="knocka-rise"].aos-init.aos-animate {
+    opacity: 1;
+    transform: none;
+  }
+
+  /*
+    The footer wordmark rises by a fraction of ITS OWN height, not a
+    fixed distance — it is 400px tall at full size and 56px on a phone,
+    and a fixed 22px would read as a twitch at one end and a lurch at
+    the other. A percentage in translate3d resolves against the element,
+    which is why this is a second animation rather than a parameter.
+  */
+  [data-aos="knocka-wordmark"].aos-init {
+    opacity: 0;
+    transform: translate3d(0, 24%, 0);
+    transition-property: opacity, transform;
+    transition-duration: 1300ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-aos="knocka-wordmark"].aos-init.aos-animate {
+    opacity: 1;
+    transform: none;
+  }
+
+  /*
+    Section headings: a longer rise that comes into focus as it lands.
+
+    The blur is the one filter this file allows, and only because it is
+    one-shot and settles on `filter: none` — nothing stays filtered once the
+    reveal is over, so the DNA canvas behind it pays for one second, once.
+    Never put this on anything that moves continuously.
+  */
+  [data-aos="knocka-heading"].aos-init {
+    opacity: 0;
+    transform: translate3d(0, 34px, 0);
+    filter: blur(10px);
+    transition-property: opacity, transform, filter;
+    transition-duration: 1100ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-aos="knocka-heading"].aos-init.aos-animate {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+
+  /*
+    Large surfaces — the expression wall, the invite panel. They settle up
+    and in from slightly smaller, which reads as the surface arriving rather
+    than as a block of content sliding. Kept to 4% so the edges barely move.
+  */
+  [data-aos="knocka-zoom"].aos-init {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0) scale(0.96);
+    transition-property: opacity, transform;
+    transition-duration: 1200ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-aos="knocka-zoom"].aos-init.aos-animate {
+    opacity: 1;
+    transform: none;
+  }
+}

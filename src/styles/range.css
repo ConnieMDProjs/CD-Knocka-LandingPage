@@ -1,0 +1,733 @@
+/* ============================================================
+   RANGE (S3) — "YOUR FACE. YOUR VOICE. YOUR KNOCK."
+
+   A room of six, a band of moving type cutting across it on a
+   tilt, and the two knock marks landing underneath.
+
+   The people are unequal on purpose. Two stand on portrait
+   plates at the edges of the composition with their heads
+   breaking out over the top edge — only possible because the
+   artwork is a cutout with real alpha. The other four are
+   circles in the corners. Every one of them has a different
+   coloured ground, which is what turns six cutouts into six
+   profiles rather than six pictures.
+
+   WHY THIS SECTION IS CSS AND NOT UTILITY CLASSES
+   It is a coordinate system. Every profile is placed from custom
+   properties it carries as data, the wide and the narrow
+   compositions are two sets of those same properties chosen by
+   one media query, and the band is a marquee. None of that is
+   expressible as utility classes without inventing a dozen
+   arbitrary-value strings per element. Type, colour and spacing
+   still come from the tokens.
+
+   WHAT MOVES, AND ON WHICH ELEMENT
+   Framer owns `.knock-profile`'s transform for the entrance, so
+   the hover transform lives one level down on `.knock-body` — an
+   inline transform from framer would win over any `:hover` rule
+   on the same element. The profile itself only straightens its
+   `rotate`, a separate property framer never writes.
+
+   Nothing that moves carries a filter: the DNA canvas repaints
+   behind this section and a blur or a drop shadow on a moving
+   layer would re-rasterise every frame. Not pinned, and nothing
+   scroll-linked — this is the pacing relief between two pinned
+   sequences.
+============================================================ */
+
+@layer components {
+  .range {
+    position: relative;
+    z-index: 10;
+  }
+
+  .range-inner {
+    width: min(var(--stage-max), calc(100% - 2 * var(--container-gutter)));
+    margin-inline: auto;
+    /* The bottom is short on purpose: the lowest profiles already sit at the
+       foot of the stage, and Arrival's pinned stage brings its own header
+       clearance above its content. Padding here stacked on top of that. */
+    padding-block: clamp(122px, 17vh, 196px) clamp(24px, 4vh, 56px);
+  }
+
+  /*
+    The coordinate space. Everything in the section is placed as a percentage
+    of this box, so one set of numbers holds from 320 to 1920 and the narrow
+    composition is a different set of the same numbers rather than a
+    different layout.
+  */
+  .knock-stage {
+    --card: clamp(140px, 16.5vw, 240px);
+    --bub: clamp(64px, 8.6vw, 126px);
+
+    position: relative;
+    height: clamp(620px, 58vw, 880px);
+  }
+
+  /* ---------- Head ---------- */
+
+  .knock-head {
+    position: absolute;
+    left: 50%;
+    top: 7%;
+    z-index: 1;
+    width: min(64%, 760px);
+    text-align: center;
+    translate: -50% 0;
+  }
+
+  .knock-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 clamp(14px, 1.8vh, 22px);
+    padding: 7px 15px;
+    border: 1px solid var(--color-border-accent);
+    border-radius: var(--radius-pill);
+    background: rgba(168, 85, 247, 0.08);
+    color: var(--color-accent-lilac);
+    font-size: var(--text-label);
+  }
+
+  .knock-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5.6vw, 96px);
+    font-weight: var(--font-weight-display);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+  }
+
+  .knock-title-line {
+    display: block;
+  }
+
+  .knock-title .text-gradient {
+    --gradient: var(--gradient-heading);
+  }
+
+  /* ---------- The band ---------- */
+
+  /*
+    Full bleed and on a tilt, so it crosses the whole composition and runs
+    off both edges of the window. `overflow-x: clip` on <main> is what keeps
+    a 132vw element from ever reaching the page's scroll width — the same
+    contract the hero and Rooms bleed under.
+
+    It sits above the head and below the people: the type passes behind the
+    portraits, which is what puts the three layers in depth order.
+  */
+  .knock-band {
+    position: absolute;
+    left: 50%;
+    top: 48%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    width: 132vw;
+    height: clamp(44px, 4.6vw, 68px);
+    overflow: hidden;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent-purple) 0%,
+      var(--color-accent-magenta) 46%,
+      var(--color-accent-cyan) 100%
+    );
+    box-shadow: 0 18px 60px -30px rgba(168, 85, 247, 0.7);
+    translate: -50% -50%;
+    rotate: -3.6deg;
+  }
+
+  /*
+    Exactly two identical runs wide, travelling -50%: the loop is seamless
+    without measuring anything. The gap lives on each item and never on the
+    flex container — a container gap is counted once and not twice, and the
+    seam opens up at the wrap.
+  */
+  .knock-band-track {
+    display: flex;
+    width: max-content;
+    animation: knock-band 34s linear infinite;
+    will-change: transform;
+  }
+
+  .knock-band-run {
+    display: flex;
+  }
+
+  .knock-band-item {
+    display: inline-flex;
+    align-items: center;
+    color: #10041a;
+    font-family: var(--font-display);
+    font-size: clamp(13px, 1.45vw, 22px);
+    font-weight: var(--font-weight-display);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .knock-band-item i {
+    margin-inline: clamp(18px, 2.2vw, 40px);
+    font-style: normal;
+    opacity: 0.5;
+  }
+
+  @keyframes knock-band {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ---------- Tail ---------- */
+
+  .knock-tail {
+    position: absolute;
+    left: 50%;
+    top: 60%;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    gap: clamp(16px, 2.2vh, 26px);
+    width: min(52%, 560px);
+    text-align: center;
+    translate: -50% 0;
+  }
+
+  .knock-lead {
+    max-width: 40ch;
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(14px, 1.05vw, 17px);
+    line-height: 1.62;
+  }
+
+  .knock-tail .range-knocks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+  }
+
+  .range-knock {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border: 1px solid rgba(192, 132, 252, 0.55);
+    border-radius: var(--radius-pill);
+    background: rgba(168, 85, 247, 0.24);
+    color: #f3e8ff;
+    font-family: var(--font-display);
+    font-size: clamp(10px, 0.95vw, 13px);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* The second knock is the one that lands. */
+  .range-knock[data-mark="2"] {
+    border-color: rgba(236, 72, 153, 0.42);
+    background: rgba(236, 72, 153, 0.18);
+    color: #f9a8d4;
+  }
+
+  /* ---------- A profile ---------- */
+
+  .knock-profile {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    z-index: 3;
+    translate: -50% -50%;
+    rotate: var(--rot);
+  }
+
+  .knock-profile[data-kind="card"] {
+    width: calc(var(--card) * var(--s));
+  }
+
+  .knock-profile[data-kind="bubble"] {
+    width: calc(var(--bub) * var(--s));
+  }
+
+  /*
+    The coloured ground. This is the whole point of the treatment: five of
+    the six images are cutouts, so the colour shows through everywhere the
+    person is not, and each of the six is different.
+  */
+  .knock-plate {
+    position: relative;
+    display: block;
+    width: 100%;
+    border: 1px solid var(--ring);
+    border-radius: inherit;
+    background: var(--tint);
+    /* The halo the knock leaves behind — see the hover rules. An outline
+       follows the border radius and is never clipped by the bubble's own
+       overflow: hidden. */
+    outline: 2px solid transparent;
+    outline-offset: 0;
+    transition:
+      border-color 0.4s ease,
+      outline-color 0.4s ease,
+      outline-offset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .knock-profile[data-kind="card"] .knock-plate {
+    aspect-ratio: 3 / 4;
+    border-radius: clamp(14px, 1.5vw, 22px);
+  }
+
+  .knock-profile[data-kind="bubble"] .knock-plate {
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+
+  /* The frame the artwork is positioned in. On a bubble it is simply the
+     circle; on a card it is the clip described below. */
+  .knock-cutout {
+    position: absolute;
+    inset: 0;
+  }
+
+  /*
+    Cards: clipped on three sides, open on the fourth. The frame matches the
+    plate's sides and bottom (and its rounded bottom corners) but reaches a
+    full plate-height above it, so the head still breaks out over the top
+    while shoulders drawn wider than the plate — Arjun's art is 142% of it —
+    stop at the plate's edge instead of spilling past it. The clip is on this
+    frame, not on the plate, so the plate's halo outline is never cut.
+  */
+  .knock-profile[data-kind="card"] .knock-cutout {
+    top: -100%;
+    overflow: hidden;
+    /* The plate's radius less its 1px border: the frame sits inside the
+       border, so its corners have to curve on the inner edge. */
+    border-radius: 0 0 calc(clamp(14px, 1.5vw, 22px) - 1px)
+      calc(clamp(14px, 1.5vw, 22px) - 1px);
+  }
+
+  /*
+    The artwork is pinned to the bottom of the plate and drawn wider than it,
+    so the head clears the top edge and the torso is cut off by the plate's
+    own bottom — which is exactly where the source images end anyway. --img-w
+    is tuned per image; the two sources have different aspect ratios and
+    different amounts of air around the subject, so one number cannot serve
+    both.
+  */
+  .knock-profile[data-kind="card"] .knock-art {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: var(--img-w);
+    max-width: none;
+    height: auto;
+    translate: -50% 0;
+  }
+
+  /* Bubbles: the portrait fills the circle, so the one JPEG's own white
+     ground becomes its colour and no cutout is required. */
+  .knock-profile[data-kind="bubble"] .knock-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% var(--focus);
+  }
+
+  /* ---------- Name plates ---------- */
+
+  .knock-name {
+    position: absolute;
+    display: grid;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  .knock-name b {
+    color: var(--color-text-primary);
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -0.01em;
+  }
+
+  .knock-name span {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.78em;
+    letter-spacing: 0.06em;
+  }
+
+  /* On a card the plate is big enough to carry its own caption. */
+  .knock-profile[data-kind="card"] .knock-name {
+    left: 8%;
+    right: 8%;
+    bottom: 7%;
+    padding: 7px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 5, 14, 0.52);
+    font-size: clamp(11px, 1vw, 14px);
+    text-align: left;
+  }
+
+  /* A bubble is too small, so its caption sits underneath it. */
+  .knock-profile[data-kind="bubble"] .knock-name {
+    left: 50%;
+    top: calc(100% + 10px);
+    width: max-content;
+    max-width: 13ch;
+    font-size: clamp(10px, 0.85vw, 13px);
+    text-align: center;
+    translate: -50% 0;
+  }
+
+  /* ---------- Voice ---------- */
+
+  /*
+    A drawn shape, never a recording and never a player — see VoiceWave.tsx.
+    It is here because the headline promises a voice: this is one person's
+    voice note, not a feature panel.
+  */
+  .knock-voice {
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 25%;
+    display: block;
+    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--radius-pill);
+    background: rgba(8, 5, 14, 0.42);
+  }
+
+  .knock-voice .range-wave {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+  }
+
+  /* ---------- Hover: one steps forward, the room steps back ---------- */
+
+  /*
+    Everything that belongs to one person moves as one. The plate, the
+    avatar and the name tag share .knock-body, and every hover transform is
+    on that — the old hover lifted the plate alone and left the name tag
+    where it was, which is what made the two read as separate objects.
+
+    Range.tsx writes --px / --py: the pointer's position over the profile,
+    0 to 1 on each axis, on pointermove and only for a mouse. The tilt, the
+    parallax and the light are all derived from those two numbers here, so
+    nothing re-renders and nothing runs per frame.
+
+    Depth comes from three layers moving by different amounts: the plate
+    tilts (the side under the pointer dips away), the avatar slides 12px
+    toward the pointer and the name tag 18px — nearer things move further.
+  */
+  .knock-body {
+    position: relative;
+    display: block;
+    /* Keeps the ripples' z-index: -1 inside this profile, behind its own
+       plate, instead of behind the whole stage. */
+    isolation: isolate;
+    border-radius: inherit;
+    transition:
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.45s ease;
+  }
+
+  .knock-profile[data-kind="card"] {
+    --pop: 1.08;
+    --ripple: 1.2;
+
+    border-radius: clamp(14px, 1.5vw, 22px);
+  }
+
+  .knock-profile[data-kind="bubble"] {
+    --pop: 1.14;
+    --ripple: 1.5;
+
+    border-radius: 50%;
+  }
+
+  /* Cards grow from their feet, so the head rises further out of the frame
+     instead of the body swelling from the middle. */
+  .knock-art {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .knock-profile[data-kind="card"] .knock-art {
+    transform-origin: 50% 100%;
+  }
+
+  /* The knock: two rings in the person's own colour, one beat apart. They
+     sit behind the plate, so they are only ever seen leaving its edge. */
+  .knock-body::before,
+  .knock-body::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 2px solid var(--ring);
+    border-radius: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Light that follows the pointer across the plate, like glare on glass.
+     A painted gradient whose only animated property is opacity. */
+  .knock-plate::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at calc(var(--px, 0.5) * 100%) calc(var(--py, 0.5) * 100%),
+      rgba(255, 255, 255, 0.3),
+      transparent 58%
+    );
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .knock-profile[data-kind="card"] .knock-name {
+    transition:
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.4s ease,
+      border-color 0.4s ease;
+  }
+
+  .knock-name span {
+    transition: color 0.4s ease;
+  }
+
+  /* Not motion, so these hold under reduced motion too. */
+  .knock-profile:hover {
+    z-index: 5;
+  }
+
+  /* The rings pulse out and one stays: a halo in the person's own colour,
+     so the knock ends on "this one is selected" rather than on nothing. */
+  .knock-profile:hover .knock-plate {
+    border-color: rgba(255, 255, 255, 0.6);
+    outline-color: var(--ring);
+    outline-offset: 5px;
+  }
+
+  .knock-profile:hover .knock-plate::after {
+    opacity: 1;
+  }
+
+  .knock-profile[data-kind="card"]:hover .knock-name {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(8, 5, 14, 0.74);
+  }
+
+  .knock-profile:hover .knock-name span {
+    color: rgba(255, 255, 255, 0.92);
+  }
+
+  /*
+    `:has()` is what makes this a CSS-only interaction — no hover state in
+    React, no re-render, nothing measured.
+
+    Darkened, not faded. At half opacity the band and the DNA field showed
+    straight through the faces, so the room read as ghosts rather than as
+    people stepping back. The filter is only ever on profiles standing still
+    — the one that moves is the hovered one, which never carries it — so the
+    rule at the top of this file (no filters on moving layers) holds.
+  */
+  .knock-stage:has(.knock-profile:hover)
+    .knock-profile:not(:hover)
+    .knock-body {
+    filter: brightness(0.42) saturate(0.75);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .knock-profile {
+      --tilt: 14deg;
+
+      transition: rotate 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .knock-body {
+      transform: perspective(800px)
+        rotateX(calc((0.5 - var(--py, 0.5)) * var(--tilt)))
+        rotateY(calc((var(--px, 0.5) - 0.5) * var(--tilt)))
+        translateY(var(--lift, 0px)) scale(var(--grow, 1));
+    }
+
+    /* The profile stands up straight to meet the pointer. */
+    .knock-profile:hover {
+      rotate: 0deg;
+    }
+
+    .knock-profile:hover .knock-body {
+      --lift: -8px;
+      --grow: 1.04;
+    }
+
+    .knock-profile:hover .knock-art {
+      transform: translate3d(
+          calc((var(--px, 0.5) - 0.5) * 12px),
+          calc((var(--py, 0.5) - 0.5) * 8px),
+          0
+        )
+        scale(var(--pop));
+    }
+
+    .knock-profile[data-kind="card"]:hover .knock-name {
+      transform: translate3d(
+        calc((var(--px, 0.5) - 0.5) * 18px),
+        calc((var(--py, 0.5) - 0.5) * 12px - 3px),
+        0
+      );
+    }
+
+    .knock-profile:hover .knock-body::before {
+      animation: knock-ripple 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .knock-profile:hover .knock-body::after {
+      animation: knock-ripple 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+  }
+
+  @keyframes knock-ripple {
+    from {
+      opacity: 0.85;
+      transform: scale(1);
+    }
+
+    to {
+      opacity: 0;
+      transform: scale(var(--ripple));
+    }
+  }
+
+  /* ---------- The narrow composition ---------- */
+
+  /*
+    A different arrangement of the same room, not the wide one squeezed: the
+    head takes the top, the band still cuts across, the two cards drop to the
+    middle side by side and the four circles take the corners around them.
+    Every number comes from the same data — see cast.ts.
+
+    It switches at 760, not at the 900 the rest of the page uses. Measured:
+    at 768 the wide composition still has room for both plates outside the
+    centre column, and the narrow one had to stretch a 205vw stage to fill
+    the width, which left the section airy and the people small.
+  */
+  @media (max-width: 760px) {
+    .knock-stage {
+      --card: clamp(118px, 30vw, 178px);
+      --bub: clamp(58px, 16vw, 96px);
+
+      height: clamp(780px, 205vw, 1000px);
+    }
+
+    .knock-head {
+      top: 3%;
+      width: 94%;
+    }
+
+    .knock-title {
+      font-size: clamp(30px, 9vw, 58px);
+    }
+
+    .knock-band {
+      top: 42%;
+      width: 142vw;
+      rotate: -4.2deg;
+    }
+
+    .knock-tail {
+      top: 48%;
+      width: min(92%, 460px);
+    }
+
+    .knock-profile {
+      left: var(--nx);
+      top: var(--ny);
+      rotate: var(--nrot);
+    }
+
+    .knock-profile[data-kind="card"] {
+      width: calc(var(--card) * var(--ns));
+    }
+
+    .knock-profile[data-kind="bubble"] {
+      width: calc(var(--bub) * var(--ns));
+    }
+
+    /* A 120px plate cannot carry a caption and a waveform. The wave is the
+       one that goes: it is the decorative half of the pair. */
+    .knock-voice {
+      display: none;
+    }
+
+    .knock-profile[data-kind="card"] .knock-name {
+      left: 6%;
+      right: 6%;
+      bottom: 6%;
+      padding: 5px 10px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    /* The mood is the first thing to go: at this size the two lines under a
+       44px circle are wider than the circle itself. */
+    .knock-profile[data-kind="bubble"] .knock-name span,
+    .knock-profile[data-kind="card"] .knock-name span {
+      display: none;
+    }
+  }
+
+  /* ---------- Static composition ---------- */
+
+  /*
+    Reduced motion keeps the room and drops the movement: the band stops
+    (its words are still all there, and still in order), the entrances are
+    short fades, and nothing travels. Nobody disappears.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .knock-band-track {
+      animation: none;
+      will-change: auto;
+    }
+
+    /* The hover's movement is all inside a no-preference query above;
+       what is left here is the light and the room stepping back. */
+  }
+
+  /*
+    Without JS the entrance styles are what the server rendered, so they need
+    clearing or the room never arrives. Same safeguard S2 and S4 use.
+  */
+  @media (scripting: none) {
+    .knock-eyebrow,
+    .knock-title .text-reveal-inner,
+    .knock-lead,
+    .knock-profile {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .range-wave path {
+      opacity: 1 !important;
+      stroke-dasharray: none !important;
+      stroke-dashoffset: 0 !important;
+    }
+
+    .range-knock {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+}

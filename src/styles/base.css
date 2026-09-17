@@ -1,0 +1,101 @@
+/* ============================================================
+   BASE / RESET
+
+   Sits in @layer base so Tailwind utilities and component
+   styles can always override it. Deliberately free of any rule
+   that could clip, transform or repaint the fixed DNA canvas.
+============================================================ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  /*
+    Every anchored jump has to clear the floating header, which ends about
+    80px down. Without this the nav works but lands with the target
+    section’s own heading tucked behind the bar.
+  */
+  section[id],
+  footer[id] {
+    scroll-margin-top: clamp(92px, 12vh, 124px);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    /* Tailwind preflight defaults this to 1.5, which would resize
+       every existing element. The page is built on the browser
+       default, so components set their own line-height instead. */
+    line-height: normal;
+  }
+
+  /*
+    Once Lenis is running it writes the scroll position every frame; native
+    smooth scrolling would ease each of those writes again and the page would
+    trail the wheel. Lenis adds .lenis to <html>, so without JS (or under
+    reduced motion, where Lenis never starts) the rule above still applies.
+  */
+  html.lenis {
+    scroll-behavior: auto;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-base);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  img,
+  video,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  /* No max-width here: the DNA canvas is sized in viewport units
+     and must not be shrunk by the scrollbar gutter. */
+  canvas {
+    display: block;
+  }
+
+  ::selection {
+    background: var(--selection-bg);
+    color: var(--color-text-primary);
+  }
+
+  /* Respect the OS setting for anything driven by CSS. The canvas
+     animation opts in separately, in its own component. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

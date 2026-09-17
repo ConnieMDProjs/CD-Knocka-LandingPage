@@ -1,0 +1,448 @@
+/* ============================================================
+   ROOMS — the film strip
+
+   A pinned stage holding one continuous horizontal strip. The
+   three rooms sit edge to edge with no gap between them, and
+   vertical scroll drags the strip right to left, so scrolling
+   down pulls the world sideways.
+
+   The strip moves by translateX only, expressed as a percentage
+   of its own width, so nothing is ever measured: three panels
+   make the strip 3x a panel wide, and moving from the first
+   centred to the third centred is exactly -2/3 of it, whatever
+   the panel width happens to be at that breakpoint.
+
+   Everything animated here is transform or opacity. No filters
+   on moving layers: the DNA canvas repaints continuously behind
+   this section, and any blur or shadow on a moving element would
+   re-rasterise every frame.
+
+   The strip sits over the existing fixed DNA canvas rather than
+   introducing a second one, and the three glows step purple ->
+   magenta -> cyan, so travelling the rooms walks the brand
+   gradient.
+============================================================ */
+
+@layer components {
+  .rooms {
+    /*
+      The strip's geometry lives on the section, not on the panel, because
+      three things read it: the panel's width, the strip's centring margin and
+      the runway's overlaps. Declared on .rooms-panel, the strip — the panel's
+      parent — could not see it, so the centring margin resolved to nothing
+      and the strip started flush left instead of with room one centred.
+    */
+    --room-panel: min(1120px, 78vw);
+    --room-ratio: 2.2857;
+
+    /* The pinned stage's padding: header clearance above, air below. */
+    --rooms-pad-top: clamp(84px, 11vh, 120px);
+    --rooms-pad-bottom: clamp(28px, 5vh, 56px);
+
+    /* Everything in the stage besides the frame: the room label, the grid
+       gap and the progress index. Measured at 83-98px from 390 to 1440 wide
+       and rounded up, so the overlaps below err on the side of air. */
+    --rooms-chrome: 100px;
+
+    /* The empty band above and below the centred content while pinned. */
+    --rooms-slack: max(
+      0px,
+      (
+          100svh - var(--rooms-pad-top) - var(--rooms-pad-bottom) -
+            var(--room-panel) / var(--room-ratio) - var(--rooms-chrome)
+        ) / 2
+    );
+
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ---------- Intro ---------- */
+
+  /*
+    Outside the pinned runway on purpose. The heading is read at full size,
+    in full, before anything moves, and then scrolls away as the strip takes
+    over — nothing is ever laid over it and it is never cropped by the pin.
+  */
+  .rooms-intro {
+    width: min(var(--stage-max), calc(100% - 2 * var(--container-gutter)));
+    margin-inline: auto;
+    /* No bottom padding: the gap down to the strip is set by the runway's
+       top overlap (--rooms-lead-gap), not stacked on it. */
+    padding-block: clamp(40px, 6vh, 80px) 0;
+    text-align: center;
+  }
+
+  .rooms-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 22px;
+    padding: 7px 15px;
+    border: 1px solid var(--color-border-accent);
+    border-radius: var(--radius-pill);
+    background: rgba(168, 85, 247, 0.08);
+    color: var(--color-accent-lilac);
+    font-size: var(--text-label);
+  }
+
+  .rooms-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(34px, min(6.6vw, 9vh), 96px);
+    font-weight: var(--font-weight-display);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+  }
+
+  .rooms-title-line {
+    display: block;
+  }
+
+  .rooms-title .text-gradient {
+    --gradient: var(--gradient-heading);
+  }
+
+  .rooms-lead {
+    max-width: 54ch;
+    margin: clamp(20px, 2.6vw, 28px) auto 0;
+    color: var(--color-text-secondary);
+    font-size: clamp(15px, 1.1vw, 17px);
+    line-height: 1.62;
+  }
+
+  /* ---------- Pinned runway ---------- */
+
+  /*
+    220vh gives 120vh of travel across three rooms. The strategy caps any
+    single section at 300vh; with the intro and the payoff the section lands
+    under that.
+
+    The negative margins pull the neighbours into the stage's empty bands.
+    The stage is a full viewport tall with its content centred — right while
+    it is pinned, but it leaves --rooms-slack of nothing above and below the
+    strip. That read as two dead gaps: intro to strip on the way in, index to
+    the next section on the way out, measured at up to 400px on a tablet.
+    Margins move where the runway sits, never its height, so the pin, its
+    length and the scroll progress driving the strip are all unchanged.
+  */
+  .rooms-runway {
+    /* Lead line to strip, as it scrolls up and as the stage pins. */
+    --rooms-lead-gap: clamp(48px, 7vh, 88px);
+
+    height: 220vh;
+    margin-top: calc(
+      -1 *
+        max(
+          0px,
+          var(--rooms-pad-top) + var(--rooms-slack) - var(--rooms-lead-gap)
+        )
+    );
+    margin-bottom: calc(
+      -1 * max(0px, var(--rooms-pad-bottom) + var(--rooms-slack) - 24px)
+    );
+  }
+
+  .rooms-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(20px, 2.6vh, 34px);
+    /* No inline padding: the strip is full-bleed and clips itself. The index
+       below it carries its own centred width. */
+    padding: var(--rooms-pad-top) 0 var(--rooms-pad-bottom);
+  }
+
+  /* ---------- The strip ---------- */
+
+  /*
+    Full-bleed and clipping. The panels are narrower than the viewport, so the
+    rooms either side stay part visible and the three read as one strip rather
+    than three cards. overflow:hidden is what keeps a transformed strip from
+    ever reaching the page's own scroll width — there is no nested scroller
+    here, only a transform.
+  */
+  .rooms-viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .rooms-strip {
+    /*
+      max-content so the strip is exactly three panels wide, which is what
+      lets the -66.6667% travel land on the third panel without measuring
+      anything. The left margin parks panel one in the middle at x = 0.
+    */
+    display: flex;
+    width: max-content;
+    margin-left: calc((100% - var(--room-panel)) / 2);
+    will-change: transform;
+  }
+
+  /* --room-panel and --room-ratio come from .rooms — see there. */
+  .rooms-panel {
+    flex: none;
+    width: var(--room-panel);
+  }
+
+  /* No gap, no border, no shadow, no radius: the rooms touch. */
+  .rooms-panel-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--room-ratio);
+    overflow: hidden;
+    background: #05040a;
+  }
+
+  .room-scene-video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .rooms-panel-label {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(10px, 1.1vw, 16px);
+    margin: clamp(14px, 1.8vh, 24px) 0 0;
+    padding-inline: clamp(2px, 0.6vw, 10px);
+  }
+
+  .rooms-panel-ordinal {
+    color: var(--color-accent-violet);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+  }
+
+  .rooms-panel-name {
+    color: var(--color-text-primary);
+    font-family: var(--font-display);
+    font-size: clamp(17px, 1.9vw, 26px);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -0.01em;
+  }
+
+  .rooms-panel-line {
+    color: var(--color-text-secondary);
+    font-size: clamp(12px, 1vw, 15px);
+  }
+
+  /* ---------- Travelling through darkness ---------- */
+
+  /*
+    Painted scrims, not a mask. A mask over a container holding decoding
+    video forces a slow compositing path — the Expression section measured
+    that at half the DNA canvas's frame rate. These are static paints.
+  */
+  .rooms-fade {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+  }
+
+  .rooms-fade-top,
+  .rooms-fade-bottom {
+    left: 0;
+    right: 0;
+    height: clamp(24px, 7%, 70px);
+  }
+
+  .rooms-fade-top {
+    top: 0;
+    background: linear-gradient(to bottom, var(--color-void), transparent);
+  }
+
+  .rooms-fade-bottom {
+    bottom: 0;
+    background: linear-gradient(to top, var(--color-void), transparent);
+  }
+
+  /* The strip runs off both sides; these are where it enters and leaves. */
+  .rooms-fade-left,
+  .rooms-fade-right {
+    top: 0;
+    bottom: 0;
+    width: clamp(44px, 13vw, 250px);
+  }
+
+  .rooms-fade-left {
+    left: 0;
+    background: linear-gradient(to right, var(--color-void), transparent);
+  }
+
+  .rooms-fade-right {
+    right: 0;
+    background: linear-gradient(to left, var(--color-void), transparent);
+  }
+
+  /* ---------- Atmosphere ---------- */
+
+  .rooms-glow {
+    position: absolute;
+    inset: -18% 12%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .rooms-glow-layer {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgba(var(--glow), 0.34) 0%,
+      rgba(var(--glow), 0.13) 44%,
+      transparent 72%
+    );
+    opacity: 0;
+    transition: opacity 0.9s ease;
+  }
+
+  .rooms-glow-layer[data-on="true"] {
+    opacity: 1;
+  }
+
+  /* ---------- Index ---------- */
+
+  /*
+    The progress indicator itself lives wholly in RoomProgress.tsx — including
+    its three data-state colours, which are data-* variants next to the
+    attribute that drives them. This only gives it a centred column, since the
+    stage above it is full-bleed.
+  */
+  .rooms-index {
+    display: flex;
+    justify-content: center;
+    width: min(var(--stage-max), calc(100% - 2 * var(--container-gutter)));
+    margin-inline: auto;
+  }
+
+  /* ---------- Closing payoff ---------- */
+
+  /*
+    Deliberately quiet, and deliberately not another headline: the page
+    already carries several display headlines, and this is a landing, not a
+    hook. It sets at about half the section headline, under a rule that
+    echoes the progress track, with generous air on both sides so the
+    section breathes before whatever follows it.
+  */
+  .rooms-payoff {
+    display: grid;
+    justify-items: center;
+    gap: clamp(22px, 3vh, 34px);
+    width: min(var(--stage-max), calc(100% - 2 * var(--container-gutter)));
+    margin-inline: auto;
+    padding-block: clamp(56px, 7.5vh, 100px);
+    text-align: center;
+  }
+
+  /* Echoes the progress rule the visitor has just watched fill three times. */
+  .rooms-payoff-rule {
+    display: block;
+    width: clamp(52px, 7vw, 96px);
+    height: 1px;
+    transform-origin: center;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-accent-violet),
+      transparent
+    );
+  }
+
+  .rooms-payoff-line {
+    max-width: 22ch;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3.4vw, 50px);
+    font-weight: var(--font-weight-display);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .rooms-payoff-line .text-gradient {
+    --gradient: var(--gradient-heading);
+  }
+
+  /* ---------- Responsive ---------- */
+
+  /*
+    Narrower screens get a narrower panel AND a taller crop, rather than the
+    desktop composition scaled down — a 2.29:1 room on a phone is a letterbox
+    strip with nothing readable in it.
+  */
+  @media (max-width: 900px) {
+    .rooms {
+      --room-panel: min(660px, 86vw);
+      --room-ratio: 1.7778;
+    }
+
+    .rooms-runway {
+      height: 215vh;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .rooms {
+      --room-panel: 88vw;
+      --room-ratio: 1.3333;
+    }
+  }
+
+  /* ---------- Static composition ---------- */
+
+  /*
+    Reduced motion drops the pin and the horizontal travel and stacks the
+    three rooms into a readable column. Nothing is hidden; the strip simply
+    stops being a strip.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    /* No pin, so no empty bands to overlap into. */
+    .rooms-runway {
+      height: auto;
+      margin-block: 0;
+    }
+
+    .rooms-stage {
+      position: static;
+      height: auto;
+      padding-block: clamp(40px, 6vh, 72px);
+    }
+
+    .rooms-viewport {
+      overflow: visible;
+    }
+
+    .rooms-strip {
+      width: auto;
+      flex-direction: column;
+      gap: clamp(28px, 4vh, 48px);
+      margin-left: 0;
+    }
+
+    .rooms-panel {
+      --room-panel: min(
+        var(--stage-max),
+        calc(100% - 2 * var(--container-gutter))
+      );
+      --room-ratio: 1.7778;
+
+      margin-inline: auto;
+    }
+
+    .rooms-fade,
+    .rooms-glow {
+      display: none;
+    }
+  }
+}

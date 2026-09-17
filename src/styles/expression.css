@@ -1,0 +1,89 @@
+/* ============================================================
+   EXPRESSION (S5) — the four rules Tailwind cannot express
+
+   Everything else in this section is utilities on the elements
+   in Expression.tsx. What is here is what Tailwind has no
+   vocabulary for: two keyframe tracks, the mask that dissolves
+   the columns into darkness, and the reduced-motion stop.
+
+   The movement is transform-only and infinite, so the
+   compositor owns it outright — no scroll input, no main-thread
+   work, nothing for the DNA canvas to compete with.
+============================================================ */
+
+@layer components {
+  .expr-strip {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+  }
+
+  /*
+    THE GAP LIVES HERE, NOT ON THE FLEX CONTAINER.
+
+    The strip holds its cards twice and animates to -50%. A flex `gap` would
+    put 2n-1 gaps in a strip of 2n cards, so -50% would land half a gap away
+    from the seam and the loop would visibly jump every pass. A bottom margin
+    on every card makes the strip exactly 2n x (card + gap), and -50% exactly
+    one repeat.
+  */
+  .expr-card {
+    margin-bottom: clamp(10px, 1.2vw, 18px);
+  }
+
+  .expr-strip[data-dir="up"] {
+    animation: expr-up var(--expr-dur, 48s) linear infinite;
+  }
+
+  .expr-strip[data-dir="down"] {
+    animation: expr-down var(--expr-dur, 48s) linear infinite;
+  }
+
+  @keyframes expr-up {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+
+  @keyframes expr-down {
+    from {
+      transform: translate3d(0, -50%, 0);
+    }
+    to {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  /*
+    NO hover pause. The drift is the section, and stopping a column under the
+    cursor made the wall feel like a control rather than a world. The columns
+    run continuously, always.
+  */
+
+  /*
+    The fade is two painted scrims in Expression.tsx, not a mask-image here.
+    That is what was asked for -- a black-to-transparent fade over the
+    gallery -- and it costs one static paint each.
+
+    A first pass blamed mask-image for a frame-rate drop. It was wrong: a
+    clean ablation put the whole cost on the number of clips playing at once
+    (see the table in Expression.tsx). Scrims are still the right call, but
+    for their simplicity, not for frames.
+  */
+
+  /*
+    Reduced motion stops the drift. Hiding the duplicated half is done with
+    Tailwind's own `motion-reduce:hidden` on the card instead of a rule here:
+    a components-layer `display: none` cannot beat the card's own display
+    utility, which is exactly the trap recorded in the Tailwind migration
+    notes. This rule only has to win against nothing.
+  */
+  @media (prefers-reduced-motion: reduce) {
+    .expr-strip {
+      animation: none;
+    }
+  }
+}

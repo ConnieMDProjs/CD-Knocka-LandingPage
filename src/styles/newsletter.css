@@ -1,0 +1,209 @@
+/* ============================================================
+   NEWSLETTER — THE INVITE BANNER
+
+   The last thing before the footer: one lit, solid panel on a
+   page that is otherwise dark glass. Everything above this is
+   translucent and lets the DNA field read through; this one is
+   opaque on purpose, so the close of the page is the only
+   surface that is actually *on*.
+
+   Built on the reference banner: eyebrow, one oversized line,
+   one supporting sentence, one CTA, concentric arcs rising out
+   of the bottom-left corner, and a fan of real app screens
+   cropped by the right edge.
+
+   NO CONTAINER QUERIES HERE, deliberately. The footer sizes its
+   wordmark in cqw because the wordmark must fill a fixed
+   fraction of the panel. This panel cannot: `cqw` resolves
+   against the container's CONTENT box, and the desktop
+   composition reserves the phone column with padding-right --
+   so a cqw padding would be defined in terms of the box its own
+   value produces. Measured: it silently pinned the headline and
+   the phones to their clamp floors at every width. Everything
+   here is vw (matching hero/range) or a percentage of the panel.
+
+   WHAT IS LEFT HERE. The section wrapper, the copy block and
+   every piece of type moved onto the elements in Newsletter.tsx
+   during the Tailwind cleanup. Three things stayed, and each
+   earns it: the panel (a three-layer gradient plus the
+   padding-right that reserves the phone column), the concentric
+   arcs (shared-origin geometry with aspect-ratio and translate),
+   and the phone fan (a radius computed from a custom property,
+   and a will-change that is load-bearing for frame rate).
+
+   Namespaced .newsletter* because sections.css still reserves
+   .cta / .cta-copy / .cta-form for a later design, and
+   src/components/sections/Invite is reserved for S6 in the
+   strategy doc.
+============================================================ */
+
+@layer components {
+  .newsletter-panel {
+    position: relative;
+    /* Crops the phone fan against the panel edge, which is the whole
+       device: the screens have to run out of the frame. */
+    overflow: hidden;
+    width: min(var(--stage-max), 100%);
+    margin-inline: auto;
+    padding: clamp(46px, 5.2vw, 92px) clamp(22px, 3.4vw, 56px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: clamp(20px, 2.4vw, 32px);
+    /*
+      The base ramp is --color-accent-purple-deep (#7627ed) carried
+      down towards the void so type stays readable on it; the two
+      radials are the other two ends of the brand gradient, magenta
+      and cyan, kept low so the panel stays purple.
+
+      Gradients rather than blurred glow elements: this paints once
+      and then only composites, and the DNA canvas behind the panel
+      is already repainting every frame.
+    */
+    background:
+      radial-gradient(
+        118% 140% at 86% 2%,
+        rgba(236, 72, 153, 0.32),
+        transparent 55%
+      ),
+      radial-gradient(
+        96% 130% at 2% 98%,
+        rgba(56, 189, 248, 0.16),
+        transparent 60%
+      ),
+      linear-gradient(132deg, #2b0c5f 0%, #4a17a4 48%, #6b23d6 100%);
+    box-shadow:
+      0 40px 90px -52px rgba(88, 24, 200, 0.9),
+      var(--hairline-top);
+  }
+
+  /* ---------- Decorative arcs ---------- */
+
+  /*
+    A full-panel layer, so its children's percentages resolve against
+    the panel. All three share one left/top, which is what keeps them
+    concentric at every width instead of each needing its own offset.
+  */
+  .newsletter-arcs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .newsletter-arcs > span {
+    position: absolute;
+    left: 1%;
+    top: 88%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    /* `translate` rather than `transform`, so nothing here competes
+       with a transform if one is ever added. */
+    translate: -50% -50%;
+  }
+
+  .newsletter-arc-fill {
+    width: 62%;
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  .newsletter-arc-ring {
+    width: 79%;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+  }
+
+  .newsletter-arc-ring-wide {
+    width: 97%;
+    border-color: rgba(255, 255, 255, 0.07);
+  }
+
+  /* ---------- The phone fan ---------- */
+
+  .newsletter-phones {
+    --phone-w: clamp(88px, 13vw, 180px);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    margin-top: clamp(52px, 7vw, 72px);
+  }
+
+  .newsletter-phone {
+    position: relative;
+    flex: none;
+    width: var(--phone-w);
+    /* Matches the corner radius baked into the artwork (31px of a
+       375px-wide screen), so the shadow follows the screen instead
+       of squaring off at its transparent corners. */
+    border-radius: calc(var(--phone-w) * 0.083);
+    /*
+      box-shadow, never drop-shadow. A drop-shadow filter re-traces
+      the artwork's alpha every frame the fan moves; the hero already
+      measured a 49fps cost for exactly that. This rasterises with
+      the layer and then only composites.
+    */
+    box-shadow: 0 30px 60px -26px rgba(6, 2, 20, 0.85);
+    /*
+      Not optional, and not a superstition. Framer Motion adds
+      will-change while a spring is in flight and takes it off again
+      when the spring settles, so every hover in and out re-promotes
+      this element and re-rasterises a layer carrying a 60px-blur
+      shadow. Measured against the DNA canvas over five rounds: without
+      this line the canvas runs at 46-54fps while the fan moves, with
+      it 59-60fps. Only three elements are promoted, and they are the
+      only things in the section that move.
+    */
+    will-change: transform;
+  }
+
+  /*
+    -0.12: the screens overlap only slightly so each reads on its own, and
+    the hover spread (PhoneStack open poses) pulls them further apart. At
+    -0.30 and below the fan looked congested.
+  */
+  .newsletter-phone + .newsletter-phone {
+    margin-left: calc(var(--phone-w) * -0.12);
+  }
+
+  /* The welcome screen is the one worth reading, so it sits on top
+     of the two behind it. */
+  .newsletter-phone-1 {
+    z-index: 1;
+  }
+
+  .newsletter-phone-2 {
+    z-index: 3;
+  }
+
+  .newsletter-phone-3 {
+    z-index: 2;
+  }
+
+  .newsletter-phone img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* ---------- Two-column composition ---------- */
+
+  @media (min-width: 901px) {
+    /*
+      The fan leaves the flow, so the panel's height is set by the
+      copy alone and the screens are free to run past the top and
+      bottom edges and be cropped. Reserving the space with
+      padding-right moves the copy's centring axis left of the panel
+      centre, which is what keeps the two apart without a grid.
+    */
+    .newsletter-panel {
+      padding-right: clamp(210px, 31vw, 470px);
+    }
+
+    .newsletter-phones {
+      position: absolute;
+      /* Flush with the panel edge. The screens are rotated, so the fan
+         still runs past it by half the difference between a screen box
+         and its rotated bounds -- which is the crop. */
+      right: 0;
+      top: 50%;
+      translate: 0 -50%;
+      margin-top: 0;
+    }
+  }
+}

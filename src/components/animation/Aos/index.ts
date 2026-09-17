@@ -1,0 +1,1 @@
+export { Aos } from "./Aos";

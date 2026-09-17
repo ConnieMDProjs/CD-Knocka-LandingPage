@@ -1,0 +1,1099 @@
+/* ============================================================
+   RESERVED SECTION STYLES
+
+   These rules came with the project but no markup uses them
+   yet: they describe sections (trust bar, avatar cards, scroll
+   video, magic, features, modes, CTA, footer) that have not
+   been built. They are preserved verbatim so the design phase
+   can pick them up, and are deliberately NOT re-tokenised —
+   nothing renders from them today.
+
+   Rules that the live navbar/hero actually use were moved to
+   site-header.css / hero.css and removed from here so there is
+   exactly one owner per selector.
+============================================================ */
+
+@layer components {
+.nav-inner {
+  width: min(1160px, calc(100% - 40px));
+  height: 100%;
+  margin: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---------------- BUTTON ---------------- */
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  border: 0;
+  border-radius: 7px;
+
+  padding: 9px 16px;
+
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+
+  background:
+    linear-gradient(
+      90deg,
+      #7627ed,
+      #ad45ff
+    );
+
+  box-shadow:
+    0 0 25px rgba(147, 45, 255, .16);
+
+  transition:
+    transform .2s,
+    box-shadow .2s;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 8px 35px rgba(147, 45, 255, .28);
+}
+
+.primary-button.large {
+  padding: 12px 19px;
+  font-size: 9px;
+}
+
+/* ---------------- HERO EXTRAS ---------------- */
+.gradient-text {
+  background:
+    linear-gradient(
+      90deg,
+      #9d3fff,
+      #d962ff
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
+}
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 19px;
+
+  margin-top: 23px;
+}
+
+.watch-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  border: 0;
+  background: transparent;
+
+  color: white;
+}
+
+.watch-button strong {
+  display: block;
+  text-align: left;
+
+  font-size: 8px;
+}
+
+.watch-button small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: rgba(255,255,255,.35);
+
+  font-size: 7px;
+}
+
+.play-icon {
+  width: 23px;
+  height: 23px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 50%;
+
+  font-size: 7px;
+}
+
+.people-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-top: 18px;
+
+  color: rgba(255,255,255,.32);
+  font-size: 7px;
+}
+
+.mini-avatars {
+  display: flex;
+}
+
+.mini-avatars img {
+  width: 21px;
+  height: 21px;
+
+  margin-left: -4px;
+
+  object-fit: cover;
+
+  border: 2px solid #050505;
+  border-radius: 50%;
+}
+
+.mini-avatars img:first-child {
+  margin-left: 0;
+}
+
+/* ---------------- VIDEO CONTROLS ---------------- */
+.video-controls {
+  position: absolute;
+
+  bottom: 8px;
+  left: 8px;
+  right: 8px;
+
+  height: 32px;
+
+  padding: 0 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-radius: 6px;
+
+  background: rgba(5,5,5,.82);
+  backdrop-filter: blur(10px);
+
+  font-size: 7px;
+}
+
+.video-title {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+
+.video-actions {
+  display: flex;
+  gap: 12px;
+
+  color: rgba(255,255,255,.65);
+}
+
+/* ============================================================
+   TRUST
+============================================================ */
+
+.trust {
+  border-top: 1px solid rgba(255,255,255,.055);
+  border-bottom: 1px solid rgba(255,255,255,.055);
+}
+
+.trust-inner {
+  width: min(1050px, calc(100% - 40px));
+  height: 54px;
+
+  margin: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: rgba(255,255,255,.24);
+
+  font-size: 8px;
+}
+
+.trust-inner strong {
+  font-size: 8px;
+}
+
+
+/* ============================================================
+   SECTION
+============================================================ */
+
+.section {
+  width: min(1120px, calc(100% - 40px));
+
+  margin: auto;
+
+  padding: 85px 0;
+}
+
+.section-label {
+  display: block;
+
+  color: #b04cff;
+
+  font-size: 8px;
+  font-weight: 500;
+
+  letter-spacing: .5px;
+}
+
+.center-heading {
+  text-align: center;
+}
+
+.center-heading h2 {
+  margin: 9px 0 0;
+
+  font-size: 31px;
+  line-height: 1;
+
+  letter-spacing: -1.7px;
+}
+
+
+/* ============================================================
+   INTRO
+============================================================ */
+
+.intro-section {
+  padding: 45px 20px 20px;
+
+  text-align: center;
+}
+
+.intro-section h2 {
+  margin: 8px 0;
+
+  font-size: 29px;
+  letter-spacing: -1.5px;
+}
+
+.intro-section p {
+  margin: 0;
+
+  color: rgba(255,255,255,.37);
+
+  font-size: 9px;
+}
+
+
+/* ============================================================
+   AVATAR CARDS
+============================================================ */
+
+.avatar-cards-section {
+  width: min(1120px, calc(100% - 40px));
+
+  margin: auto;
+
+  padding: 20px 0 70px;
+}
+
+.avatar-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+
+  gap: 10px;
+}
+
+.avatar-card {
+  position: relative;
+
+  height: 185px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+
+  background: #0b0b0d;
+}
+
+.avatar-card img {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition: transform .5s;
+}
+
+.avatar-card:hover img {
+  transform: scale(1.05);
+}
+
+.avatar-card-overlay {
+  position: absolute;
+
+  inset: auto 0 0;
+
+  padding: 35px 12px 12px;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0,0,0,.95)
+    );
+}
+
+.avatar-card-overlay p {
+  margin: 0;
+
+  color: white;
+
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.avatar-card-bottom {
+  position: absolute;
+
+  bottom: -25px;
+
+  left: 0;
+  right: 0;
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 5px;
+
+  color: rgba(255,255,255,.35);
+
+  font-size: 7px;
+}
+
+.avatar-card-bottom span:first-child {
+  color: #b14cff;
+}
+
+
+/* ============================================================
+   SCROLL VIDEO
+============================================================ */
+
+.scroll-video-section {
+  position: relative;
+
+  height: 250vh;
+}
+
+.scroll-video-sticky {
+  position: sticky;
+
+  top: 0;
+
+  height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.scroll-video-glow {
+  position: absolute;
+
+  width: 450px;
+  height: 450px;
+
+  border-radius: 50%;
+
+  background: #8629ff;
+
+  filter: blur(130px);
+
+  opacity: .07;
+}
+
+.scroll-video {
+  position: relative;
+
+  width: min(850px, 88vw);
+  height: 72vh;
+
+  object-fit: cover;
+
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 25px;
+
+  background: #09070b;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.8);
+}
+
+.scroll-video-gradient {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 45%;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0,0,0,.85)
+    );
+}
+
+.scroll-video-info {
+  position: absolute;
+
+  z-index: 2;
+
+  left: max(7vw, calc((100vw - 1120px) / 2));
+
+  bottom: 10vh;
+}
+
+.scroll-video-info h2 {
+  margin: 8px 0 0;
+
+  max-width: 600px;
+
+  font-size: clamp(35px, 5vw, 65px);
+
+  line-height: .92;
+
+  letter-spacing: -3px;
+}
+
+.scroll-video-info p {
+  max-width: 400px;
+
+  margin: 12px 0 0;
+
+  color: rgba(255,255,255,.45);
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+.scroll-indicator {
+  position: absolute;
+
+  right: 30px;
+  bottom: 35px;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: rgba(255,255,255,.25);
+
+  font-size: 7px;
+}
+
+.scroll-indicator span {
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+
+  background: #a444ff;
+
+  box-shadow:
+    0 0 10px #a444ff;
+}
+
+
+/* ============================================================
+   MAGIC SECTION
+============================================================ */
+
+.magic-section {
+  padding-top: 110px;
+}
+
+.magic-grid {
+  display: grid;
+
+  grid-template-columns: .8fr 1.2fr;
+
+  gap: 80px;
+
+  align-items: center;
+}
+
+.magic-copy h2 {
+  margin: 10px 0;
+
+  font-size: 35px;
+
+  line-height: .98;
+
+  letter-spacing: -2px;
+}
+
+.magic-copy > p {
+  max-width: 350px;
+
+  color: rgba(255,255,255,.4);
+
+  font-size: 9px;
+
+  line-height: 1.6;
+}
+
+.steps {
+  margin-top: 28px;
+}
+
+.step {
+  display: flex;
+
+  gap: 13px;
+
+  margin: 16px 0;
+}
+
+.step-number {
+  min-width: 20px;
+
+  color: #a94cff;
+
+  font-size: 8px;
+}
+
+.step strong {
+  display: block;
+
+  font-size: 9px;
+}
+
+.step p {
+  margin: 4px 0 0;
+
+  color: rgba(255,255,255,.34);
+
+  font-size: 7px;
+}
+
+
+/* ============================================================
+   FEATURE CARDS
+============================================================ */
+
+.feature-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 10px;
+}
+
+.feature-card {
+  min-height: 135px;
+
+  padding: 23px;
+
+  border: 1px solid rgba(164,63,255,.17);
+
+  border-radius: 11px;
+
+  background:
+    radial-gradient(
+      circle at 50% 25%,
+      rgba(147,43,255,.13),
+      transparent 65%
+    ),
+    #0a080c;
+
+  transition:
+    transform .25s,
+    border-color .25s;
+}
+
+.feature-card:hover {
+  transform: translateY(-4px);
+
+  border-color: rgba(177,75,255,.4);
+}
+
+.feature-icon {
+  color: #cf5aff;
+
+  font-size: 25px;
+
+  text-shadow:
+    0 0 20px rgba(205,82,255,.6);
+}
+
+.feature-card h3 {
+  margin: 13px 0 6px;
+
+  font-size: 9px;
+}
+
+.feature-card p {
+  margin: 0;
+
+  color: rgba(255,255,255,.34);
+
+  font-size: 7px;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   THREE STEPS
+============================================================ */
+
+.three-steps {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 10px;
+
+  margin-top: 30px;
+}
+
+.work-card {
+  position: relative;
+
+  padding: 19px;
+
+  min-height: 120px;
+
+  border: 1px solid rgba(255,255,255,.07);
+
+  border-radius: 10px;
+
+  background: #090909;
+}
+
+.work-number {
+  color: #9f46ff;
+
+  font-size: 7px;
+}
+
+.work-icon {
+  margin-top: 13px;
+
+  color: #c25aff;
+
+  font-size: 20px;
+}
+
+.work-card h3 {
+  margin: 10px 0 4px;
+
+  font-size: 9px;
+}
+
+.work-card p {
+  margin: 0;
+
+  max-width: 180px;
+
+  color: rgba(255,255,255,.32);
+
+  font-size: 7px;
+
+  line-height: 1.5;
+}
+
+
+/* ============================================================
+   MODES
+============================================================ */
+
+.modes-section {
+  padding-bottom: 100px;
+}
+
+.mode-grid {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 10px;
+
+  margin-top: 30px;
+}
+
+.mode-card {
+  position: relative;
+
+  height: 190px;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  border-radius: 10px;
+
+  background: #080808;
+}
+
+.mode-card video {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition: transform .5s;
+}
+
+.mode-card:hover video {
+  transform: scale(1.05);
+}
+
+.mode-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+
+  background:
+    linear-gradient(
+      transparent 20%,
+      rgba(0,0,0,.95)
+    );
+}
+
+.mode-icon {
+  margin-bottom: 8px;
+
+  color: #c052ff;
+
+  font-size: 15px;
+}
+
+.mode-overlay h3 {
+  margin: 0;
+
+  font-size: 9px;
+}
+
+.mode-overlay p {
+  margin: 4px 0 0;
+
+  color: rgba(255,255,255,.4);
+
+  font-size: 7px;
+}
+
+
+/* ============================================================
+   CTA
+============================================================ */
+
+.cta {
+  width: min(1100px, calc(100% - 40px));
+
+  min-height: 190px;
+
+  margin: 0 auto 85px;
+
+  padding: 30px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 40px;
+
+  border: 1px solid rgba(255,255,255,.08);
+
+  border-radius: 19px;
+
+  background:
+    radial-gradient(
+      circle at 15% 50%,
+      rgba(132,43,255,.19),
+      transparent 40%
+    ),
+    #090909;
+}
+
+.cta-copy h2 {
+  margin: 0;
+
+  font-size: 27px;
+
+  line-height: 1;
+
+  letter-spacing: -1.5px;
+}
+
+.cta-copy p {
+  margin: 11px 0 0;
+
+  color: rgba(255,255,255,.35);
+
+  font-size: 8px;
+}
+
+.cta-form {
+  width: 330px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.cta-form input,
+.cta-form select {
+  width: 100%;
+
+  height: 31px;
+
+  padding: 0 10px;
+
+  border: 1px solid rgba(255,255,255,.1);
+
+  border-radius: 6px;
+
+  outline: none;
+
+  background: #111113;
+
+  color: white;
+
+  font-size: 8px;
+}
+
+.cta-form select {
+  color: rgba(255,255,255,.55);
+}
+
+.cta-form input:focus,
+.cta-form select:focus {
+  border-color: #9340ff;
+}
+
+.cta-form .primary-button {
+  height: 32px;
+}
+
+.supporters {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-top: 2px;
+
+  color: rgba(255,255,255,.28);
+
+  font-size: 7px;
+}
+
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+.footer {
+  width: min(1100px, calc(100% - 40px));
+
+  margin: auto;
+
+  padding-bottom: 45px;
+
+  display: grid;
+
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+
+  gap: 40px;
+
+  color: rgba(255,255,255,.35);
+
+  font-size: 7px;
+}
+
+.footer-brand p {
+  margin: 9px 0;
+
+  color: rgba(255,255,255,.4);
+}
+
+.footer-brand small {
+  color: rgba(255,255,255,.22);
+}
+
+.footer-column strong {
+  display: block;
+
+  margin-bottom: 12px;
+
+  color: white;
+
+  font-size: 8px;
+}
+
+.footer-column a {
+  display: block;
+
+  margin: 8px 0;
+
+  color: rgba(255,255,255,.35);
+
+  text-decoration: none;
+
+  transition: color .2s;
+}
+
+.footer-column a:hover {
+  color: white;
+}
+
+/* ============================================================
+   RESPONSIVE
+
+   The .nav-links / .hero / .hero-copy / .hero-description /
+   .hero h1 rules that used to live in these blocks now live
+   with their components in site-header.css and hero.css.
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .hero-actions,
+  .people-row {
+    justify-content: center;
+  }
+
+  .avatar-cards {
+    grid-template-columns:
+      repeat(3, 1fr);
+  }
+
+  .avatar-card:nth-child(4),
+  .avatar-card:nth-child(5) {
+    display: none;
+  }
+
+  .magic-grid {
+    grid-template-columns: 1fr;
+
+    gap: 45px;
+  }
+
+  .mode-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .cta {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .cta-form {
+    width: 100%;
+  }
+
+  .footer {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .trust-inner {
+    overflow: hidden;
+
+    gap: 25px;
+
+    justify-content: flex-start;
+
+    white-space: nowrap;
+  }
+
+  .trust-inner span:nth-child(n+4),
+  .trust-inner strong:nth-child(n+4) {
+    display: none;
+  }
+
+  .avatar-cards {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .avatar-card:nth-child(4) {
+    display: block;
+  }
+
+  .avatar-card:nth-child(5) {
+    display: none;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .three-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .scroll-video {
+    width: 92vw;
+    height: 70vh;
+
+    border-radius: 18px;
+  }
+
+  .scroll-video-info {
+    left: 6vw;
+    bottom: 12vh;
+  }
+
+  .scroll-video-info h2 {
+    font-size: 42px;
+  }
+
+  .scroll-indicator {
+    display: none;
+  }
+
+  .footer {
+    grid-template-columns: 1fr;
+  }
+
+  .cta {
+    padding: 25px;
+  }
+}
+
+}

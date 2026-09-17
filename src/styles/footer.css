@@ -1,0 +1,124 @@
+/* ============================================================
+   SITE FOOTER — the two rules Tailwind should not own
+
+   The grid, the link columns, the meta row, the back-to-top
+   control and every breakpoint moved onto the elements in
+   Footer.tsx during the Tailwind cleanup. Two rules stayed:
+
+   1. The panel, because it DECLARES --footer-pad. The wordmark
+      cancels that padding with a negative margin to go
+      full-bleed, so the value has to live somewhere both can
+      reach. It is also the cqw container the wordmark is sized
+      against, and it carries a two-layer background.
+
+   2. The wordmark, which is background-clip: text over two
+      stacked gradients whose stops are placed against measured
+      ink extents. Nothing about it is expressible as utilities
+      without becoming unreadable.
+
+   The panel is translucent but deliberately carries NO
+   backdrop-filter. The DNA canvas repaints behind it every
+   frame, so blurring a panel this large would re-blur the
+   backdrop continuously. Plain alpha lets the particles read
+   through at zero cost.
+
+   Namespaced .site-footer* because sections.css still reserves
+   .footer / .footer-brand / .footer-column for a later design.
+============================================================ */
+
+@layer components {
+  .site-footer-panel {
+    position: relative;
+    overflow: hidden;
+    /* The wordmark is sized in cqw so it fills the same fraction of the
+       panel at every width. Sizing it in vw drifted between 89% and 104%
+       because the panel stops growing at --stage-max but vw does not. */
+    container-type: inline-size;
+    width: min(var(--stage-max), 100%);
+    margin-inline: auto;
+    --footer-pad: clamp(24px, 3.4vw, 52px);
+
+    padding: clamp(32px, 4vw, 56px) var(--footer-pad) 0;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: clamp(20px, 2.4vw, 32px);
+    background:
+      radial-gradient(
+        120% 90% at 82% 0%,
+        rgba(168, 85, 247, 0.12),
+        transparent 62%
+      ),
+      rgba(9, 7, 14, 0.78);
+    box-shadow: var(--hairline-top);
+  }
+
+  /* ---------- Oversized wordmark ---------- */
+
+  .site-footer-wordmark {
+    /* Full-bleed inside the panel: cancels the panel padding so the
+       wordmark spans edge to edge like the reference layouts. */
+    margin-inline: calc(-1 * var(--footer-pad));
+    margin-top: clamp(12px, 1.6vw, 22px);
+    overflow: hidden;
+    text-align: center;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .site-footer-wordmark span {
+    display: block;
+    font-family: var(--font-display);
+    font-size: clamp(56px, 31cqw, 400px);
+    font-weight: var(--font-weight-display);
+    letter-spacing: -0.04em;
+    /*
+      Both margins are em-based, so the same slice is taken at every size.
+
+      The negative bottom margin runs the letterforms *past* the panel's
+      inner edge rather than up to it: the wordmark is the floor of the site,
+      so it should be cut by the floor, not resting on it. Measured at 1440
+      the baseline now sits about 14px below the panel edge, which leaves no
+      gap at any width and lets the panel's own corner radius round off the
+      outer letters. The negative top margin removes the font's half-leading,
+      which was opening dead space above the caps.
+    */
+    margin-top: -0.1em;
+    margin-bottom: 0;
+    /*
+      Two clipped layers, and the stops are placed against measurement rather
+      than by eye. The background box is the span's line box, but the ink only
+      occupies roughly 12% (cap line) to 82% (baseline) of it — the rest is
+      the font's leading, and the crop above throws the bottom of the box away
+      entirely. Stops written 0-100% therefore put their darkest end in the
+      part that gets cut off, which is why the shadow did not read at all.
+      Everything below is expressed in that 12-82 band.
+
+      Underneath: purple, lit at the cap line, sinking to near-black by the
+      baseline, so the letters are shadowed exactly where they meet the floor.
+      On top: a symmetric darkening at the left and right extremes, which is
+      what gives the reference its centre-bright, edges-in-shadow depth.
+    */
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(4, 3, 8, 0.64) 0%,
+        rgba(4, 3, 8, 0.24) 24%,
+        rgba(4, 3, 8, 0) 47%,
+        rgba(4, 3, 8, 0) 53%,
+        rgba(4, 3, 8, 0.24) 76%,
+        rgba(4, 3, 8, 0.64) 100%
+      ),
+      linear-gradient(
+        180deg,
+        #f6ecff 10%,
+        #d9b1ff 26%,
+        #b06cf9 46%,
+        #8a3ae6 60%,
+        #5a189f 70%,
+        #2b0b52 78%,
+        #12051f 84%
+      );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}

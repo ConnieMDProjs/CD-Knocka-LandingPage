@@ -1,0 +1,131 @@
+/* ============================================================
+   KNOCKA DESIGN TOKENS
+
+   Every value here is extracted from the existing landing page
+   (inline styles + globals.css). Nothing was invented or
+   re-colored: this file only gives the current visual language
+   a single, reusable home.
+
+   Tailwind v4 is CSS-first, so `@theme` does double duty:
+   it declares the CSS custom properties on :root AND generates
+   the matching utilities (bg-void, text-accent-purple, ...).
+============================================================ */
+
+@theme {
+  /* ---------- Background / surfaces ---------- */
+  --color-void: #030305; /* page + canvas background */
+  --color-base: #030303; /* body background */
+  --color-surface: #0a0a0c; /* raised card */
+  --color-surface-deep: #0b080d; /* media wells */
+  --color-surface-raised: #111113; /* inputs, controls */
+  --color-glass: rgba(255, 255, 255, 0.02); /* frosted panel */
+  --color-glass-strong: rgba(255, 255, 255, 0.05); /* frosted control */
+
+  /* ---------- Accents ---------- */
+  --color-accent-purple: #a855f7;
+  --color-accent-purple-deep: #7627ed;
+  --color-accent-violet: #c084fc;
+  --color-accent-lilac: #d8b4fe;
+  --color-accent-magenta: #ec4899;
+  --color-accent-cyan: #38bdf8;
+
+  /* ---------- Text ---------- */
+  --color-text-primary: #ffffff;
+  --color-text-bright: #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: rgba(255, 255, 255, 0.42);
+
+  /* ---------- Borders ---------- */
+  --color-border-faint: rgba(255, 255, 255, 0.04);
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-glass: rgba(255, 255, 255, 0.1);
+  --color-border-bright: rgba(255, 255, 255, 0.25);
+  --color-border-accent: rgba(168, 85, 247, 0.25);
+  --color-border-accent-strong: rgba(168, 85, 247, 0.3);
+
+  /* ---------- Radii ---------- */
+  --radius-control: 14px;
+  --radius-media: 16px;
+  --radius-panel: 22px;
+  --radius-pill: 20px;
+
+  /* ---------- Typography ---------- */
+  /* next/font supplies --font-inter / --font-outfit on <html>. */
+  --font-sans: var(--font-inter), Inter, Arial, sans-serif;
+  --font-display: var(--font-outfit), Outfit, var(--font-sans);
+
+  --text-label: 12px; /* eyebrow / small labels */
+  --text-nav: 13px; /* buttons + nav controls */
+  --text-nav--line-height: normal;
+  --text-body: 15px; /* body copy + primary CTA */
+  --text-body--line-height: 1.6;
+  --text-caption: 13px; /* uppercase captions */
+
+  --font-weight-display: 900;
+  --font-weight-strong: 800;
+  --font-weight-medium: 600;
+
+  /* ---------- Spacing / layout ---------- */
+  --container-max: 1160px;
+  /* Page side margin. Scales up on wider screens so the composition
+     never runs to the edge of the glass. */
+  --container-gutter: clamp(24px, 3vw, 40px);
+  --spacing-inline: 5%; /* horizontal page padding */
+  --spacing-section: 60px; /* vertical section padding */
+
+  /* ---------- Blur ---------- */
+  --blur-glow: 100px;
+  --blur-glass: 10px;
+}
+
+/*
+  Gradients, glows and shadows are not Tailwind theme namespaces,
+  so they live as plain custom properties rather than in @theme.
+  Reach them with an arbitrary value - bg-[image:var(--gradient-brand)],
+  shadow-[var(--shadow-media)] - or from a component stylesheet.
+
+  Everything in @theme above DOES generate utilities, so prefer those:
+  bg-void, text-text-secondary, border-border-glass, rounded-panel,
+  text-label, font-display and so on all exist without any extra setup.
+*/
+:root {
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-accent-purple),
+    var(--color-accent-magenta)
+  );
+  --gradient-heading: linear-gradient(
+    to right,
+    var(--color-accent-purple),
+    var(--color-accent-violet),
+    var(--color-accent-cyan)
+  );
+  --gradient-avatar: radial-gradient(
+    circle,
+    rgba(192, 132, 252, 0.7) 0%,
+    rgba(107, 33, 168, 0.4) 70%
+  );
+  --gradient-well: radial-gradient(circle at center, #1e1b4b 0%, #080810 100%);
+  --gradient-scrim: linear-gradient(transparent, rgba(0, 0, 0, 0.95));
+
+  --glow-purple: #8a2dff;
+  --shadow-media: 0 30px 80px rgba(0, 0, 0, 0.65);
+  --shadow-media-deep: 0 30px 100px rgba(0, 0, 0, 0.8);
+  --shadow-glow-soft: 0 0 25px rgba(147, 45, 255, 0.16);
+  --shadow-glow-strong: 0 8px 35px rgba(147, 45, 255, 0.28);
+
+  /* Floating header control layer */
+  --surface-header: rgba(10, 8, 16, 0.55);
+  --surface-header-dense: rgba(10, 8, 16, 0.82);
+  --shadow-header: 0 20px 50px -24px rgba(0, 0, 0, 0.95);
+  --shadow-header-glow: 0 0 44px -14px rgba(168, 85, 247, 0.4);
+  --hairline-top: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  /* Hero stage */
+  --stage-max: 1240px;
+
+  --selection-bg: #963cff;
+
+  /* Retired: the hero + footer now give the DNA canvas its scroll
+     range, so <main> no longer needs a placeholder height. */
+}

@@ -1,0 +1,63 @@
+/* ============================================================
+   KNOCKA GLOBAL STYLESHEET
+
+   Single entry point for styling. Cascade order matters:
+
+     1. tokens      design tokens + Tailwind theme (@theme)
+     2. base        reset and document defaults   (@layer base)
+     3. utilities   the one primitive Tailwind cannot express,
+                    plus the layered button hover (button.css)
+     4. components  header, hero, sections, footer
+     5. sections    styles reserved for unbuilt sections
+
+   The page shell moved to utility classes in the Tailwind
+   migration, so page-shell.css no longer exists.
+
+   Everything after `tokens` is layered, so Tailwind utility
+   classes always win over project CSS.
+============================================================ */
+
+@import "tailwindcss";
+
+/*
+  One variant for "the user is engaging with this control", so a hover style
+  and its keyboard equivalent cannot drift apart. Replaces the
+  ".x:hover, .x:focus-visible" pairs the stylesheets used to repeat.
+*/
+@custom-variant interact (&:hover, &:focus-visible);
+
+/*
+  Exact-equivalent max-width variants. NOT a convenience.
+
+  Tailwind's own "max-[1024px]:" compiles to "@media not (min-width: 1024px)",
+  which is "width < 1024px" and therefore EXCLUDES exactly 1024px. Every rule
+  these replaced was written "@media (max-width: 1024px)", which INCLUDES it.
+  At exactly 1024px the desktop nav reappeared beside the burger — caught by
+  the fingerprint at rm1024, invisible at every other width.
+
+  Use these anywhere a max-width breakpoint is converted. "min-[Npx]:" needs
+  no equivalent: min-width is inclusive in both syntaxes.
+*/
+@custom-variant upto-1024 { @media (max-width: 1024px) { @slot; } }
+@custom-variant upto-900 { @media (max-width: 900px) { @slot; } }
+@custom-variant upto-760 { @media (max-width: 760px) { @slot; } }
+@custom-variant upto-560 { @media (max-width: 560px) { @slot; } }
+@custom-variant upto-360 { @media (max-width: 360px) { @slot; } }
+
+@import "../styles/tokens.css";
+@import "../styles/base.css";
+@import "../styles/utilities.css";
+@import "../styles/button.css";
+@import "../styles/back-to-top.css";
+@import "../styles/site-header.css";
+@import "../styles/hero.css";
+@import "../styles/arrival.css";
+@import "../styles/film.css";
+@import "../styles/range.css";
+@import "../styles/how.css";
+@import "../styles/rooms.css";
+@import "../styles/aos.css";
+@import "../styles/expression.css";
+@import "../styles/newsletter.css";
+@import "../styles/footer.css";
+@import "../styles/sections.css";
