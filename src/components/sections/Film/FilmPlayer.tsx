@@ -22,10 +22,10 @@ import { scrollToTarget } from "@/lib/smooth-scroll";
  */
 type Mode = "preview" | "playing" | "paused" | "ended";
 
-const CHAPTERS = storyFilm.chapters;
+const CONCEPTS = storyFilm.concepts;
 
-/** Stagger for the chapter reveals. Literal strings so Tailwind sees them. */
-const CHAPTER_DELAY = ["delay-[80ms]", "delay-[160ms]", "delay-[240ms]", "delay-[320ms]"];
+/** Stagger for the card reveals. Literal strings so Tailwind sees them. */
+const CARD_DELAY = ["delay-[80ms]", "delay-[160ms]", "delay-[240ms]", "delay-[320ms]"];
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
@@ -33,9 +33,6 @@ const formatTime = (seconds: number) => {
   const whole = Math.max(0, Math.floor(seconds));
   return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 };
-
-const chapterAt = (time: number) =>
-  CHAPTERS.reduce((current, chapter, index) => (time >= chapter.start ? index : current), 0);
 
 /** false on the server and during hydration, true after — without an effect. */
 const noSubscribe = () => () => {};
@@ -100,22 +97,17 @@ function FullscreenIcon() {
 /* ------------------------------------------------------------------ */
 
 /**
- * The film, its controls and its chapters.
+ * The film, its controls and the concept cards beside it.
  *
  * **It starts itself, with sound.** Once the frame is well into view the film
  * plays from 0:00 with sound — but never under reduced motion, and never on a
- * data-saver connection, where a 13MB clip nobody requested is a real cost.
+ * data-saver connection, where a multi-MB clip nobody requested is a real cost.
  * If the browser refuses audio (no click or key yet on the page), it plays
  * muted and unmutes on the visitor's next interaction. Out of view it pauses,
  * and back in view it resumes.
  *
- * **Clicking starts it over.** Play restarts from 0:00 (or from the chapter
- * clicked). Starting it pauses every other video on the page, because two
+ * **Clicking starts it over.** Play restarts from 0:00. Starting it pauses every other video on the page, because two
  * soundtracks at once is never right.
- *
- * **The chapters are the index and the scrubber.** They carry the story as
- * text — so it survives with the video off — show where the film is, and
- * jump to any beat.
  *
  * Without JavaScript the video keeps its native controls, so it still plays.
  */
@@ -298,7 +290,6 @@ export function FilmPlayer({ children }: { children: ReactNode }) {
     idleTimer.current = window.setTimeout(() => setIdle(true), 2200);
   };
 
-  const active = chapterAt(time);
   const inFilm = mode === "playing" || mode === "paused";
 
   return (
@@ -409,34 +400,18 @@ export function FilmPlayer({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <ol className="film-chapters" aria-label="Chapters">
-        {CHAPTERS.map((chapter, index) => {
-          const end = CHAPTERS[index + 1]?.start ?? duration;
-          const progress = clamp01((time - chapter.start) / (end - chapter.start));
-          return (
-            // The reveal lives on the <li>, whose class never changes: AOS
-            // adds its classes to the element, and a re-rendered className
-            // would wipe them. State goes on the button as aria-current.
-            <li key={chapter.title} data-aos="knocka-rise" className={CHAPTER_DELAY[index]}>
-              <button
-                type="button"
-                className="film-chapter"
-                aria-current={index === active ? "step" : undefined}
-                aria-label={`Play from ${formatTime(chapter.start)}: ${chapter.title}. ${chapter.line}`}
-                onClick={() => startFilm(chapter.start)}
-              >
-                <span className="film-chapter-n">{String(index + 1).padStart(2, "0")}</span>
-                <span className="film-chapter-title">{chapter.title}</span>
-                <span className="film-chapter-time">{formatTime(chapter.start)}</span>
-                <span className="film-chapter-line">{chapter.line}</span>
-                <span className="film-chapter-bar" aria-hidden="true">
-                  <span style={{ transform: `scaleX(${progress})` }} />
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ol>
-    </div>
+      <ul className="film-concepts" aria-label="The idea">
+        {CONCEPTS.map((concept, index) => (
+          <li key={concept.title} data-aos="knocka-rise" className={CARD_DELAY[index]}>
+            <div className="film-concept">
+              <span className="film-concept-icon" aria-hidden="true">
+                {concept.icon}
+              </span>
+              <h3 className="film-concept-title">{concept.title}</h3>
+              <p className="film-concept-line">{concept.line}</p>
+            </div>
+          </li>
+        ))}
+      </ul>    </div>
   );
 }

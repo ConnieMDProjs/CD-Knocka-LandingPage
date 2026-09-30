@@ -134,54 +134,49 @@ export const rooms: readonly Room[] = [
    The film — the 30-second story, between S2 and How it works
 --------------------------------------------------------------- */
 
-export interface FilmChapter {
+export interface FilmConcept {
+  readonly icon: string;
   readonly title: string;
   readonly line: string;
-  /** Seconds into the film where this chapter begins. */
-  readonly start: number;
 }
 
 /**
  * The Knocka story film.
  *
- * `chapters` are read off the cut itself, not the script: the script's scene
- * timings drifted in the edit (the pulse lands at 0:05, not 0:04; the knock
- * starts at 0:12, not 0:09; the reply scene was cut). If the film is
- * re-edited, re-check these against a frame per second.
- *
- * The poster is the 0:12.5 frame — the knock on the glass with the three
- * open options, which is the whole product in one image.
+ * The poster is a frame from the earlier cut (the knock on the glass with the
+ * three open options). If the film is re-edited, re-export it from the new one.
  */
 export const storyFilm = {
-  src: "/Knocka-Story-Video1.mp4",
+  src: "/Knocka-Story-Video2.mp4",
   poster: "/film/knocka-film-poster.jpg",
-  /** The source is 1024x768. */
+  /** The source is 960x720. */
   ratio: "4 / 3",
   /** Seconds. Replaced by the file's own duration once metadata loads. */
-  duration: 29.4,
+  duration: 38,
   alt: "The Knocka film: Jessica sends her good news as a Knocka, and her avatar knocks on her friend's screen to tell him herself.",
-  chapters: [
+  /** The main ideas, as cards beside the film. Static: they don't track playback. */
+  concepts: [
     {
-      title: "Send",
-      line: "Jessica gets the job. Her avatar is as excited as she is.",
-      start: 0,
+      icon: "🎭",
+      title: "Send your emotion",
+      line: "Don't type 'so happy'. Let your avatar show it.",
     },
     {
-      title: "Travel",
-      line: "The message leaves as a Knocka and lands on his phone.",
-      start: 5,
+      icon: "🚪",
+      title: "Your avatar knocks",
+      line: "It shows up on their screen and tells them itself.",
     },
     {
-      title: "Knock",
-      line: "Her avatar knocks from inside his screen. He picks Experience.",
-      start: 12,
+      icon: "✨",
+      title: "Feels real",
+      line: "Expressions and reactions, not flat words.",
     },
     {
-      title: "Arrive",
-      line: "She tells him herself — and they celebrate together.",
-      start: 18,
+      icon: "🎉",
+      title: "Celebrate together",
+      line: "They react back, and the moment is shared.",
     },
-  ] satisfies readonly FilmChapter[],
+  ] satisfies readonly FilmConcept[],
 } as const;
 
 /* ---------------------------------------------------------------

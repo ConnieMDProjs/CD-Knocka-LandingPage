@@ -11,8 +11,8 @@ import { FilmPlayer } from "./FilmPlayer";
  *
  * A server component: the copy is static and the reveals are AOS. The heading
  * is handed to the player as children so the player can own the layout — on
- * a wide screen the film sits beside the heading and the chapters, on a
- * narrow one the three stack as heading, film, chapters.
+ * a wide screen the film sits beside the heading and the concept cards, on a
+ * narrow one the three stack as heading, film, cards.
  */
 export function Film() {
   return (

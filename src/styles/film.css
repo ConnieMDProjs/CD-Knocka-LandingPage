@@ -4,9 +4,7 @@
    A player and an index, side by side. The film is 4:3, so it
    sits in the wider column rather than spanning the page — a
    full-width 4:3 frame is taller than most screens. The heading
-   and the four chapters take the column beside it, and the
-   chapters double as the scrubber: each one fills as the film
-   plays through it, and clicking one plays from there.
+   and four static concept cards take the column beside it.
 
    Nothing here is scroll-linked and nothing moves by itself
    except the video. The reveals are AOS, one-shot. Controls are
@@ -29,19 +27,19 @@
 
   /*
     Three areas, two arrangements. Wide: the film on the left the full
-    height, the heading and the chapters stacked beside it. Narrow: heading,
-    film, chapters, top to bottom — the order someone reads them in.
+    height, the heading and the cards stacked beside it. Narrow: heading,
+    film, cards, top to bottom — the order someone reads them in.
   */
   .film-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
+    grid-template-columns: minmax(0, 540px) minmax(0, 1fr);
+    grid-template-rows: auto auto;
     grid-template-areas:
-      "stage head"
-      "stage chapters";
-    column-gap: clamp(32px, 4.5vw, 72px);
-    row-gap: clamp(20px, 3vh, 32px);
-    align-items: start;
+      "head head"
+      "stage concepts";
+    column-gap: clamp(28px, 4vw, 64px);
+    row-gap: clamp(24px, 4vh, 44px);
+    align-items: center;
   }
 
   .film-head {
@@ -53,8 +51,8 @@
     grid-area: stage;
   }
 
-  .film-chapters {
-    grid-area: chapters;
+  .film-concepts {
+    grid-area: concepts;
   }
 
   /* ---------- Head ---------- */
@@ -318,90 +316,78 @@
     gap: 10px;
   }
 
-  /* ---------- Chapters ---------- */
+  /* ---------- Concept cards ---------- */
 
-  .film-chapters {
+  .film-concepts {
     display: grid;
-    gap: 4px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .film-chapter {
+  /* Each card carries one tone, used only at low alpha, so the set reads
+     colourful without competing with the film. */
+  .film-concepts > li:nth-child(1) {
+    --tone: 168 85 247;
+  }
+  .film-concepts > li:nth-child(2) {
+    --tone: 236 72 153;
+  }
+  .film-concepts > li:nth-child(3) {
+    --tone: 251 146 60;
+  }
+  .film-concepts > li:nth-child(4) {
+    --tone: 45 212 191;
+  }
+
+  .film-concept {
+    height: 100%;
+    padding: 18px;
+    border: 1px solid rgb(var(--tone) / 0.32);
+    border-radius: 18px;
+    background: linear-gradient(
+      150deg,
+      rgb(var(--tone) / 0.16),
+      rgb(var(--tone) / 0.04) 70%
+    );
+    transition:
+      border-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .film-concept:hover {
+    border-color: rgb(var(--tone) / 0.6);
+    transform: translateY(-3px);
+  }
+
+  .film-concept-icon {
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    column-gap: 14px;
-    row-gap: 4px;
-    align-items: baseline;
-    width: 100%;
-    padding: 14px 16px 16px;
-    border: 0;
-    border-radius: 14px;
-    background: transparent;
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 14px;
+    border-radius: 13px;
+    background: rgb(var(--tone) / 0.22);
+    box-shadow: inset 0 0 0 1px rgb(var(--tone) / 0.3);
+    font-size: 21px;
   }
 
-  .film-chapter:is(:hover, :focus-visible) {
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .film-chapter[aria-current] {
-    background: rgba(168, 85, 247, 0.09);
-  }
-
-  .film-chapter-n,
-  .film-chapter-time {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    font-variant-numeric: tabular-nums;
-    transition: color 0.3s ease;
-  }
-
-  .film-chapter-title {
-    color: rgba(255, 255, 255, 0.7);
+  .film-concept-title {
+    margin: 0 0 4px;
+    color: var(--color-text-primary);
     font-family: var(--font-display);
-    font-size: clamp(16px, 1.4vw, 20px);
+    font-size: clamp(15px, 1.3vw, 18px);
     font-weight: var(--font-weight-medium);
     letter-spacing: -0.01em;
-    transition: color 0.3s ease;
   }
 
-  .film-chapter-line {
-    grid-column: 2 / 4;
+  .film-concept-line {
+    margin: 0;
     color: var(--color-text-secondary);
     font-size: 13.5px;
     line-height: 1.5;
-  }
-
-  .film-chapter-bar {
-    grid-column: 2 / 4;
-    height: 2px;
-    margin-top: 8px;
-    overflow: hidden;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .film-chapter-bar > span {
-    display: block;
-    height: 100%;
-    background: var(--gradient-brand);
-    transform-origin: left;
-    transition: transform 0.25s linear;
-  }
-
-  .film-chapter[aria-current] .film-chapter-n {
-    color: var(--color-accent-violet);
-  }
-
-  .film-chapter[aria-current] .film-chapter-title,
-  .film-chapter:is(:hover, :focus-visible) .film-chapter-title {
-    color: var(--color-text-primary);
   }
 
   /* ---------- Narrow ---------- */
@@ -410,10 +396,11 @@
     .film-layout {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: none;
+      align-items: start;
       grid-template-areas:
         "head"
         "stage"
-        "chapters";
+        "concepts";
     }
 
     .film-lead {
@@ -428,8 +415,8 @@
       display: none;
     }
 
-    .film-chapter {
-      padding: 12px 12px 14px;
+    .film-concepts {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 }
